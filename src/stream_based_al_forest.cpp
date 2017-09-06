@@ -71,9 +71,12 @@ void MondrianBlock::update_sum_dim_range() {
 */
 void MondrianBlock::update_range_states(const arma::fvec& cur_min_dim, 
         const arma::fvec& cur_max_dim) {
-    if (debug_)
+    if (debug_){
         cout << "### [MondrianBlock] - update_range_states" << endl;
-    if (int(min_block_dim_.size()) == feature_dim_ && 
+        cout << "min_block_dim_.size() = " << min_block_dim_.size();
+        cout << "max_block_dim_.size() = " << max_block_dim_.size();
+    }
+    if (int(min_block_dim_.size()) == feature_dim_ &&
             int(max_block_dim_.size()) == feature_dim_) {
         min_block_dim_ = arma::min(min_block_dim_, cur_min_dim);
         max_block_dim_ = arma::max(max_block_dim_, cur_max_dim);
@@ -461,12 +464,14 @@ void MondrianNode::update(const Sample& sample) {
  * - go through vector count_labels_ and check if only one element is > 1
  */
 bool MondrianNode::check_if_same_labels() {
-    if (settings_->debug) 
+    if (settings_->debug){
         cout << "### pause_mondrian()" << endl;
+    }
     bool same_labels = false;
     /* Function "count" returns number of values that are zero */
+    assert(all(count_labels_ >= 0));
     arma::Col<arma::uword> zero_elem = arma::find(count_labels_ < 1);
-    if (zero_elem.size() == ((unsigned int)count_labels_.size()-1) ||
+    if (zero_elem.size() == (static_cast<unsigned int>(count_labels_.size()-1)) ||
             count_labels_.size() <= 1) {
         same_labels = true;
     }
@@ -750,6 +755,8 @@ void MondrianNode::sample_mondrian_block(const Sample& sample,
 
         /* Sample split dimension */
         split_dim_ = sample_multinomial_scores(dim_range);
+        if (settings_->debug)
+            cout << "initial split_dim_:" << split_dim_;
         /* Check if it is possible to introduce a split in current dimension */
         int count_sample_search = 0;
         int max_count_search = feature_dim;

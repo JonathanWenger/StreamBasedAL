@@ -77,9 +77,9 @@ inline string new_name(const string str, int numb) {
  * (works only if small values are used)
  */
 inline bool equal(float A, float B) {
-    if (A == B)  /* Infinite values */
+    if (abs(A-B) < eps)
         return true;
-    if (fabs(A-B) < eps)
+    if (A == B)  /* Infinite values */
         return true;
     return false;
 }

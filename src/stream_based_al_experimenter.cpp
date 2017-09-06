@@ -52,7 +52,7 @@ void Experimenter::train(MondrianForest* mf, DataSet& dataset,
       exit(EXIT_FAILURE);
   }
   /* Initialize progress bar */
-  unsigned int expected_count= dataset.num_samples_;
+  unsigned int expected_count = dataset.num_samples_;
   /* Display training progress */
   boost::progress_display show_progress( expected_count );
 
@@ -62,7 +62,7 @@ void Experimenter::train(MondrianForest* mf, DataSet& dataset,
 
   /*---------------------------------------------------------------------*/
   /* Go through complete training set */
-  int long i_samp = 0; 
+  int long i_samp = 0;
   //for (; i_samp < hp.number_of_samples_for_training_; i_samp++) {
   for (; i_samp < number_training_samples; i_samp++) {
       Sample sample = dataset.get_next_sample();
@@ -71,6 +71,7 @@ void Experimenter::train(MondrianForest* mf, DataSet& dataset,
       /* Show progress */
       ++show_progress;
   }
+    
 
   /*---------------------------------------------------------------------*/
   cout << endl;
@@ -114,14 +115,14 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
   unsigned int expected_count = dataset.num_samples_;
   /* Display training progress */
   boost::progress_display show_progress( expected_count );
-
+    
   /* Initialize stop time for training */
   timeval startTime;
   gettimeofday(&startTime, NULL);
 
   /* Variables of active learning */
   vector<float> active_conf_values;
-
+    
   /*---------------------------------------------------------------------*/
   /* Go through complete training set */
   
@@ -140,6 +141,10 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
             mf->update(sample);
             pResult_ -> samples_used_for_training_++;
         } else {
+            /* Stop training if the number of samples used for training is larger than specified */
+            if (pResult_->samples_used_for_training_ == hp.active_number_max_set_){
+                break;
+            }
             pair<int, float> pred = mf->predict_class_confident(sample);
             if (pred.second < hp.active_confidence_value_) {
                 mf->update(sample);
@@ -165,6 +170,10 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
         mf->update(sample);
         pResult_ -> samples_used_for_training_++;
       } else {
+          /* Stop training if the number of samples used for training is larger than specified */
+          if (pResult_->samples_used_for_training_ == hp.active_number_max_set_){
+              break;
+          }
 
         pair<int, float> pred = mf->predict_class_confident(sample);
         i_active_sample.first = sample;

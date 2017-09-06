@@ -1,4 +1,4 @@
-# This is a make file for Mondrian forest package
+# This is a make file for the Mondrian forest package
 # -----------------------------------------------
 
 # Compiler options

@@ -56,6 +56,8 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
     active_learning_ = config_file.lookup("Training.active_learning");
     active_number_init_set_ = config_file.lookup(
         "Training.active_number_init_set");
+    active_number_max_set_ = config_file.lookup(
+        "Training.active_number_max_set");
     active_batch_size_ = config_file.lookup(
         "Training.active_batch_size");
     active_buffer_lowest_confidence_ = (bool)config_file.lookup(
