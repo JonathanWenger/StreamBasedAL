@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/stream_based_al_main.cpp"
-            timestampString = "526118305.441119"
+            timestampString = "526496469.813497"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "148"
@@ -26,11 +26,11 @@
             ignoreCount = "1000"
             continueAfterRunningActions = "No"
             filePath = "src/stream_based_al_forest.cpp"
-            timestampString = "526121287.804118"
+            timestampString = "526901011.341332"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "758"
-            endingLineNumber = "758"
+            startingLineNumber = "762"
+            endingLineNumber = "762"
             landmarkName = "MondrianNode::sample_mondrian_block(const Sample&amp; sample, bool create_new_leaf)"
             landmarkType = "7">
             <Actions>
@@ -50,12 +50,60 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/stream_based_al_forest.cpp"
-            timestampString = "526121287.804118"
+            timestampString = "526901011.341332"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "793"
-            endingLineNumber = "793"
+            startingLineNumber = "797"
+            endingLineNumber = "797"
             landmarkName = "MondrianNode::sample_mondrian_block(const Sample&amp; sample, bool create_new_leaf)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/stream_based_al_data.cpp"
+            timestampString = "526484147.81885"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "163"
+            endingLineNumber = "163"
+            landmarkName = "DataSet::load_complete_dataset(const string&amp; x_filename, const string&amp; y_filename)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/stream_based_al_main.cpp"
+            timestampString = "526496469.813497"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "132"
+            endingLineNumber = "132"
+            landmarkName = "main(int argc, char *argv[])"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/stream_based_al_random.cpp"
+            timestampString = "526826659.560189"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "93"
+            endingLineNumber = "93"
+            landmarkName = "RandomGenerator::rand_discrete_distribution(arma::fvec&amp; scores)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

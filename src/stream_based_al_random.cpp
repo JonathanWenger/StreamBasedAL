@@ -90,4 +90,8 @@ float RandomGenerator::rand_exp_distribution(float lambda) {
     return exp_gen();
 }
 
+int RandomGenerator::rand_discrete_distribution(arma::fvec& scores) {
+    boost::random::discrete_distribution<> dist(scores);
+    return dist(generator);
+}
 

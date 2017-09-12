@@ -23,6 +23,7 @@
 #include <boost/random/mersenne_twister.hpp>  /**< Random generator mt19937 */
 #include <boost/generator_iterator.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/discrete_distribution.hpp>
 #include <sys/time.h>
 
 #include "stream_based_al_utilities.h"
@@ -57,6 +58,7 @@ class RandomGenerator {
         float rand_uniform_distribution(float min_value, float max_value,
                 bool& equal_values);
         float rand_exp_distribution(float lambda);
+        int rand_discrete_distribution(arma::fvec& scores);
 
     private:
         base_generator_type generator; // base random number generator
@@ -67,18 +69,6 @@ class RandomGenerator {
             boost::uniform_real<float> > uni_gen;
 
 };
-
-inline int sample_multinomial_scores(arma::fvec& scores) {
-    arma::fvec scores_cumsum = arma::cumsum(scores);
-    float s = scores_cumsum(scores_cumsum.size()-1) *
-    arma::randu<arma::fvec>(1)[0];
-    /* -1 at the end, as it starts at 0 and not at 1 */
-    int k = int(arma::sum(s > scores_cumsum));
-    assert(k >= 0);
-    //TODO:
-    //assert(k <= int(scores.size())-1);
-    return k;
-}
 
 #endif /* STREAM_BASED_AL__RANDOM_H_ */
 /*---------------------------------------------------------------------------*/

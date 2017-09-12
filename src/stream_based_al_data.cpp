@@ -13,6 +13,7 @@
 
 #include "stream_based_al_data.h"
 
+
 /*---------------------------------------------------------------------------*/
 /*
  * Result
@@ -157,10 +158,14 @@ void DataSet::load_complete_dataset(const string& x_filename,
     for (int n_samp = 0; n_samp < num_samples_; n_samp++) {
         Sample sample;
         sample.x = arma::fvec(feature_dim_);
-        yfp >> sample.y;
+        int tmp_y;
+        assert(yfp >> tmp_y && !yfp.fail()); //check successful read
+        sample.y = tmp_y;
         labels.insert(sample.y);
         for (int n_feat = 0; n_feat < feature_dim_; n_feat++) {
-            xfp >> sample.x(n_feat);
+            float tmp_x;
+            assert(xfp >> tmp_x && !xfp.fail()); //check successful read
+            sample.x(n_feat) = tmp_x;
         }
         samples_.push_back(sample);
     }
@@ -304,9 +309,9 @@ void DataSet::open_position_file(const string& file) {
     }
     int cur_num;
     for (int n_samp = 0; n_samp < num_samples_; n_samp++) {
-        x_num_file >> cur_num;
+        assert(x_num_file >> cur_num);
         x_file_position_.push_back(cur_num);
-        y_num_file >> cur_num;
+        assert(y_num_file >> cur_num);
         y_file_position_.push_back(cur_num);
     }
     

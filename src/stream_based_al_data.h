@@ -99,7 +99,7 @@ class DataSet {
         const bool random_;  /**< Will select samples randomly */
         const bool sort_classes_;  /**< Samples are sorted after classes */
         const bool load_iterative_;  /**< Load data points one after another */
-        int sample_pos_;  /**< Saves currnet position of vector "samples_" */
+        unsigned int sample_pos_;  /**< Saves current position of vector "samples_" */
         vector<Sample> samples_;  /**< Vector with all samples */
         vector<long int> x_file_position_;  /**< Vector with absolute position
                                             of the beginning of a lint */

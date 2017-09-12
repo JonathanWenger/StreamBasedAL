@@ -399,6 +399,7 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
     /* c_j,k: number of customers at restaurant j eating dish k */     
     /* Compute posterior mean normalized stable */
     if (!is_leaf_) {
+        assert(split_dim_ >= 0 && split_dim_ < sample.x.n_elem);
         if (equal(sample.x[split_dim_],split_loc_) || sample.x[split_dim_]
                 < split_loc_) {
 
@@ -596,6 +597,7 @@ MondrianNode::compute_left_right_statistics(
         arma::fvec min_cur_block, arma::fvec max_cur_block,
         bool left_split) {
     std::vector<arma::fvec> points;
+    
 
     if (left_split) {
         if (sample_x[split_dim] <= split_loc) {
@@ -618,10 +620,12 @@ MondrianNode::compute_left_right_statistics(
             points.push_back(max_cur_block);
         }     
     }
+    //assert(points.size() > 0);
+    
     /* Calculate min and max boundary values */
     std::vector<arma::fvec>::iterator it = points.begin();
-    arma::fvec tmp_min(sample_x.size());
-    arma::fvec tmp_max(sample_x.size());
+    arma::fvec tmp_min(sample_x.size(), arma::fill::zeros); //tmp_min and tmp_max stay uninitialized if points.size() == 0
+    arma::fvec tmp_max(sample_x.size(), arma::fill::zeros); //Find reason why points.size() == 0 and correct way to initialize tmp_min and tmp_max
     if (it != points.end()) {
         tmp_min = *it;
         tmp_max = *it;
@@ -754,7 +758,7 @@ void MondrianNode::sample_mondrian_block(const Sample& sample,
         arma::fvec dim_range = max_block_sample - min_block_sample;
 
         /* Sample split dimension */
-        split_dim_ = sample_multinomial_scores(dim_range);
+        split_dim_ = rng.rand_discrete_distribution(dim_range);
         if (settings_->debug)
             cout << "initial split_dim_:" << split_dim_;
         /* Check if it is possible to introduce a split in current dimension */
@@ -762,7 +766,7 @@ void MondrianNode::sample_mondrian_block(const Sample& sample,
         int max_count_search = feature_dim;
         while (count_sample_search < max_count_search) {
             if (equal(min_block[split_dim_], max_block[split_dim_])) {
-                split_dim_ = sample_multinomial_scores(min_block);
+                split_dim_ = rng.rand_discrete_distribution(min_block);
             } else {
                 break;
             }
@@ -786,7 +790,7 @@ void MondrianNode::sample_mondrian_block(const Sample& sample,
         /* Set decision prior parameters for density estimation */
         arma::fvec tmp_max_block_sample = max_block_sample;
         if(max_block_sample[split_dim_] < split_loc_){
-            tmp_max_block_sample += eps; //TODO: fix uniform sampling implementation and remove this
+            tmp_max_block_sample[split_dim_] += eps; //TODO: fix uniform sampling implementation and remove this
         }
         set_decision_distr_params(min_block_sample, tmp_max_block_sample);
         
@@ -883,6 +887,7 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
     float expo_param = arma::sum(e_lower) + arma::sum(e_upper);
 
     /* Exponential distribution */
+    assert(!(split_cost < 0));
     if (!greater_zero(expo_param)) {
         split_cost = numeric_limits<float>::infinity();
     } else {
@@ -965,13 +970,13 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
         /* Problem can occur that min and max boundary value are the same
          * at a sampled split location -> solution: sample again until
          * it is different */
-        int split_dim = sample_multinomial_scores(feat_score);
+        int split_dim = rng.rand_discrete_distribution(feat_score);
         /* Check if it is possible to introduce a split in current dimension */
         int max_sample_search = mondrian_block_->get_feature_dim();
         int count_sample_search = 0;
         while (count_sample_search < max_sample_search) {
             if (equal(min_block[split_dim_], max_block[split_dim_])) {
-                split_dim_ = sample_multinomial_scores(min_block);
+                split_dim_ = rng.rand_discrete_distribution(min_block);
             } else {
                 break;
             }
@@ -1279,6 +1284,7 @@ void MondrianTree::set_max_prob_mass_leaf(MondrianNode& new_max_prob_mass_leaf){
  */
 MondrianForest::MondrianForest(const mondrian_settings& settings, 
                 const int& feature_dim) :
+    data_counter_(0),
     settings_(&settings) {
     MondrianTree* tree = NULL;
     for (int n_tree = 0; n_tree < settings.num_trees; n_tree++) {
@@ -1312,7 +1318,7 @@ void MondrianForest::update(Sample& sample) {
 int MondrianForest::predict_class(Sample& sample) {
     /* Go through all trees and calculate probability */
     //float expo_param = 1.0;
-    mondrian_confidence m_conf;
+    mondrian_confidence m_conf = {0,0,0};
     arma::fvec pred_prob = predict_probability(sample, m_conf);
 
     int pred_class = -1;  /* Predicted class of Mondrian forest */ 
@@ -1417,6 +1423,7 @@ float MondrianForest::confidence_prediction(arma::fvec& pred_prob,
     else if(settings_->confidence_measure == 1){
     /* Confidence: normalized entropy */
         float entropy = 0;
+        assert(pred_prob.size() > 1);
         for (int i = 0; i < pred_prob.size(); i++){
             if(pred_prob(i) > 0)
                 entropy += -pred_prob(i)*log(pred_prob(i))/log(pred_prob.size());
@@ -1425,7 +1432,7 @@ float MondrianForest::confidence_prediction(arma::fvec& pred_prob,
     }
         
     /* Take normalized density account */
-    float lambda = .2;
+    float lambda = 0;
     float new_confidence = (confidence + lambda*m_conf.normalized_density)/(1+lambda);
     return new_confidence;
 }
