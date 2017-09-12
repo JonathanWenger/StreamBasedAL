@@ -28,7 +28,7 @@
 
 
 //#define eps 0.00001
-#define eps 0.0001
+#define eps 0
 
 using namespace std;
 

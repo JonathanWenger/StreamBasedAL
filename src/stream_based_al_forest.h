@@ -111,9 +111,13 @@ class MondrianBlock {
          */
         inline int get_feature_dim();
         /**
+         * Get maximum and minimum of block dimensions and the current sample
+         */
+        pair<arma::fvec, arma::fvec> get_range_states(const arma::fvec& cur_sample);
+        /**
          * Get dimension range
          */
-        float get_dim_range(const arma::fvec& cur_sample);
+        float get_sum_dim_range(const arma::fvec& cur_sample);
         /**
          * Get lower block boundary
          */

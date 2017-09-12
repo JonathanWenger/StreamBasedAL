@@ -49,13 +49,21 @@ MondrianBlock::~MondrianBlock() {
 }
 
 /**
+ * Get maximum and minimum of block dimensions and the current sample
+ */
+pair<arma::fvec, arma::fvec> MondrianBlock::get_range_states(const arma::fvec& cur_sample) {
+    arma::fvec min_block_sample = arma::min(min_block_dim_, cur_sample);
+    arma::fvec max_block_sample = arma::max(max_block_dim_, cur_sample);
+    assert(all(max_block_sample >= min_block_sample));
+    return pair<arma::fvec, arma::fvec>(min_block_sample, max_block_sample);
+}
+
+/**
  * Get dimension range
  */
-float MondrianBlock::get_dim_range(const arma::fvec& cur_sample) {
-
-    arma::fvec min_block_dim = arma::min(min_block_dim_, cur_sample);
-    arma::fvec max_block_dim = arma::max(max_block_dim_, cur_sample);
-    float sum_dim_range =  arma::accu(max_block_dim - min_block_dim);
+float MondrianBlock::get_sum_dim_range(const arma::fvec& cur_sample) {
+    pair<arma::fvec, arma::fvec> range_states = get_range_states(cur_sample);
+    float sum_dim_range =  arma::accu(range_states.second - range_states.first);
     return sum_dim_range;
 }
 /*
@@ -620,12 +628,12 @@ MondrianNode::compute_left_right_statistics(
             points.push_back(max_cur_block);
         }     
     }
-    //assert(points.size() > 0);
+    assert(points.size() > 0);
     
     /* Calculate min and max boundary values */
     std::vector<arma::fvec>::iterator it = points.begin();
-    arma::fvec tmp_min(sample_x.size(), arma::fill::zeros); //tmp_min and tmp_max stay uninitialized if points.size() == 0
-    arma::fvec tmp_max(sample_x.size(), arma::fill::zeros); //Find reason why points.size() == 0 and correct way to initialize tmp_min and tmp_max
+    arma::fvec tmp_min(sample_x.size(), arma::fill::zeros);
+    arma::fvec tmp_max(sample_x.size(), arma::fill::zeros);
     if (it != points.end()) {
         tmp_min = *it;
         tmp_max = *it;
@@ -718,89 +726,63 @@ void MondrianNode::sample_mondrian_block(const Sample& sample,
 
     if (settings_->debug)
         cout << "### sample_mondrian_block-----------------" << endl;
-    bool if_paused = check_if_same_labels(sample);
-
+    
+    // Compute dimension-wise minimum and maximum of the block and the new sample
+    pair<arma::fvec, arma::fvec> range_states = mondrian_block_->get_range_states(sample.x);
+    arma::fvec min_block_sample = range_states.first;
+    arma::fvec max_block_sample = range_states.second;
+    arma::fvec min_block = mondrian_block_->get_min_block_dim();
+    arma::fvec max_block = mondrian_block_->get_max_block_dim();
+    
+    // Compute dimension range and split cost
+    float dim_range = arma::accu(max_block_sample - min_block_sample);
+    assert(dim_range >= 0);
     float split_cost = 0.0;
-    float dim_range = 1.0;
-    dim_range = mondrian_block_->get_sum_dim_range();
-    if (equal(dim_range, 0.0)) {
-        dim_range = mondrian_block_->get_dim_range(sample.x);
-        if (greater_zero(dim_range)) {
-            create_new_leaf = true;
-        } else {
-            dim_range = 0.0;
-        }
-    } else if (dim_range < -1) {
-        dim_range = 0.0;
-    }
-    if (if_paused == true || equal(dim_range,0.)) { 
+    if (check_if_same_labels(sample) || dim_range == 0){
+        // Pause Mondrian
         split_cost = numeric_limits<float>::infinity();
         max_split_costs_ = budget_;
     } else {
+        // Sample split cost
         split_cost = rng.rand_exp_distribution(dim_range);
         max_split_costs_ = split_cost;
     }
+    
+    if (mondrian_block_->get_sum_dim_range() == 0.0) {
+            create_new_leaf = true;
+    }
+    
+    // Compute budget of child nodes
     float new_budget = budget_ - split_cost;
-    if (!greater_zero(new_budget))
+    if (new_budget < 0)
         new_budget = 0.0;
+    
+    
     if (budget_ > split_cost) {
         assert(is_leaf_);
         is_leaf_ = false;  /* Will now be a parent node */
-        /* Check if min_block and max_block are minimum and maximum,
-         * as it is possible that it is not updated yet (if this function
-         * was called in extend_mondrian_block -> current node will
-         * be updated afterwards */
         int feature_dim = mondrian_block_->get_feature_dim();
-        arma::fvec min_block = mondrian_block_->get_min_block_dim();
-        arma::fvec max_block = mondrian_block_->get_max_block_dim();
-        arma::fvec max_block_sample = arma::max(max_block, sample.x);
-        arma::fvec min_block_sample = arma::min(min_block, sample.x);
-        arma::fvec dim_range = max_block_sample - min_block_sample;
 
         /* Sample split dimension */
-        split_dim_ = rng.rand_discrete_distribution(dim_range);
-        if (settings_->debug)
-            cout << "initial split_dim_:" << split_dim_;
-        /* Check if it is possible to introduce a split in current dimension */
-        int count_sample_search = 0;
-        int max_count_search = feature_dim;
-        while (count_sample_search < max_count_search) {
-            if (equal(min_block[split_dim_], max_block[split_dim_])) {
-                split_dim_ = rng.rand_discrete_distribution(min_block);
-            } else {
-                break;
-            }
-            count_sample_search += 1;
-        }
-        /* Compute left right statistics */
-        std::pair<arma::fvec, arma::fvec> left_right_block;
-        /* Special case if new samples lies not in current block
-         * (not between min_block and max_block */
+        arma::fvec tmp_block_dim = max_block_sample - min_block_sample;
+        split_dim_ = rng.rand_discrete_distribution(tmp_block_dim);
+        
+        /* Sample split location */
         split_loc_ = rng.rand_uniform_distribution(min_block_sample[split_dim_],
                 max_block_sample[split_dim_]);
-        if (max_block[split_dim_] < sample.x[split_dim_] ||
-                equal(max_block[split_dim_],sample.x[split_dim_])) {
-            min_block = mondrian_block_->get_max_block_dim();
-            max_block = sample.x;
-        } else if (min_block[split_dim_] > sample.x[split_dim_] ||
-                equal(min_block[split_dim_],sample.x[split_dim_])) {
-            max_block = mondrian_block_->get_min_block_dim();
-            min_block = sample.x;
-        }
+
         /* Set decision prior parameters for density estimation */
-        arma::fvec tmp_max_block_sample = max_block_sample;
-        if(max_block_sample[split_dim_] < split_loc_){
-            tmp_max_block_sample[split_dim_] += eps; //TODO: fix uniform sampling implementation and remove this
-        }
-        set_decision_distr_params(min_block_sample, tmp_max_block_sample);
+        set_decision_distr_params(min_block_sample, max_block_sample);
         
         if (settings_->debug) {
             cout << "min_block: " << min_block << endl;
             cout << "max_block: " << max_block << endl;
             cout << "split_dim: " << split_dim_ << endl;
         }
-        /* Sample split location */
+        
         /* Create new child nodes */
+        /* Compute left right statistics */
+        std::pair<arma::fvec, arma::fvec> left_right_block;
         /* Left side of the split */
         left_right_block = compute_left_right_statistics(split_dim_,
                 split_loc_, sample.x,
