@@ -14,44 +14,47 @@
 #include "stream_based_al_random.h"
 
 /*---------------------------------------------------------------------------*/
-bool RandomGenerator::seed_flag_ = false;
-base_generator_type RandomGenerator::generator( init_seed() );
+/* Instantiate global random number generator */
+RandomGenerator rng;
 
 /*---------------------------------------------------------------------------*/
 RandomGenerator::RandomGenerator() :
+    generator(init_seed()),
     uni_dist(0.0,1.0),
     uni_gen(generator ,uni_dist) {
-    if (!seed_flag_) {
-        generator.seed(static_cast<unsigned int>(init_seed()));
-        seed_flag_ = true;
-    }
+}
+
+unsigned int RandomGenerator::init_seed() {
+    ifstream devFile("/dev/urandom", ios::binary);
+    unsigned int outInt = 0;
+    char tempChar[sizeof(outInt)];
+    
+    devFile.read(tempChar, sizeof(outInt));
+    outInt = atoi(tempChar);
+    
+    devFile.close();
+    
+    struct timeval TV;
+    gettimeofday(&TV, NULL);
+    unsigned int seed = static_cast<unsigned int>( TV.tv_sec * TV.tv_usec + getpid() + outInt);
+    return seed;
+}
+
+void RandomGenerator::set_seed(unsigned int new_seed){
+    generator.seed(new_seed);
+    uni_gen.engine().seed(new_seed);
+    uni_gen.distribution().reset();
 }
 
 float RandomGenerator::rand_uniform_distribution() {
+    boost::uniform_real<float> uni_dist;
+    boost::variate_generator<base_generator_type&,
+    boost::uniform_real<float> > uni_gen(generator, uni_dist);
     return uni_gen();
 }
 
 float RandomGenerator::rand_uniform_distribution(
         float min_value, float max_value) {
-    if (equal(min_value,max_value)) {
-        max_value += eps;
-        //cout << "[WARNING]: - rand_uniform_distribution: min_value == max_value" << endl;
-    }
-    float rand_value = min_value + (max_value - min_value) * 
-        rand_uniform_distribution();
-
-    return rand_value;
-}
-
-float RandomGenerator::rand_uniform_distribution(
-        float min_value, float max_value, bool& equal_values) {
-    if (equal(min_value,max_value)) {
-        max_value += eps;
-        //cout << "[WARNING]: - rand_uniform_distribution: min_value == max_value" << endl;
-        equal_values = true;
-    } else {
-        equal_values = false;
-    }
     float rand_value = min_value + (max_value - min_value) * 
         rand_uniform_distribution();
 
@@ -59,11 +62,15 @@ float RandomGenerator::rand_uniform_distribution(
 }
 
 float RandomGenerator::rand_exp_distribution(float lambda) {
-    if (equal(lambda,0.0) || !greater_zero(lambda) ) {
-        lambda = 1;
-    }
+    assert(lambda > 0);
     boost::exponential_distribution<float> exp_dist(lambda);
     boost::variate_generator<base_generator_type&,
         boost::exponential_distribution<float> > exp_gen(generator, exp_dist);
     return exp_gen();
 }
+
+int RandomGenerator::rand_discrete_distribution(arma::fvec& scores) {
+    boost::random::discrete_distribution<> dist(scores);
+    return dist(generator);
+}
+

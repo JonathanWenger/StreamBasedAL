@@ -13,6 +13,7 @@
 
 #include "stream_based_al_data.h"
 
+
 /*---------------------------------------------------------------------------*/
 /*
  * Result
@@ -139,7 +140,7 @@ void DataSet::load_complete_dataset(const string& x_filename,
 
     /* Reading the header (first line of file)*/
     int tmp;
-    long int tmp_samples;
+    unsigned int tmp_samples;
     xfp >> tmp_samples;
     num_samples_ = tmp_samples;
     xfp >> feature_dim_;
@@ -157,19 +158,22 @@ void DataSet::load_complete_dataset(const string& x_filename,
     for (int n_samp = 0; n_samp < num_samples_; n_samp++) {
         Sample sample;
         sample.x = arma::fvec(feature_dim_);
-        yfp >> sample.y;
+        int tmp_y;
+        assert(yfp >> tmp_y && !yfp.fail()); //check successful read
+        sample.y = tmp_y;
         labels.insert(sample.y);
         for (int n_feat = 0; n_feat < feature_dim_; n_feat++) {
-            xfp >> sample.x(n_feat);
+            float tmp_x;
+            assert(xfp >> tmp_x && !xfp.fail()); //check successful read
+            sample.x(n_feat) = tmp_x;
         }
         samples_.push_back(sample);
     }
     xfp.close();
     yfp.close();
-    num_classes_ = labels.size();
+    num_classes_ = (int) labels.size();
 
     if (random_) {
-        srand(init_seed());
         random_shuffle(samples_.begin(), samples_.end());
     }
 }
@@ -210,7 +214,6 @@ void DataSet::load_dataset_iteratively(const string& x_filename,
         for (long int i = 0; i < num_samples_; i++) {
             rand_vec_.push_back(i);
         }
-        srand(init_seed());
         random_shuffle(rand_vec_.begin(), rand_vec_.end());
     }
 }
@@ -222,7 +225,7 @@ void DataSet::create_position_file(const string& file) {
     cout << endl;
     cout << "Trying to create file with all line positions ..." << endl;
 
-    int pos = file.find(".");
+    int pos = (int) file.find(".");
     string file_tmp = file.substr(0, pos);
     string x_filename = file_tmp + ".pos_data";
     string y_filename = file_tmp + ".pos_labels";
@@ -283,7 +286,7 @@ void DataSet::create_position_file(const string& file) {
  */
 void DataSet::open_position_file(const string& file) {
      
-    int pos = file.find(".");
+    int pos = (int) file.find(".");
     string file_tmp = file.substr(0, pos);
     string x_filename = file_tmp + ".pos_data";
     string y_filename = file_tmp + ".pos_labels";
@@ -306,9 +309,9 @@ void DataSet::open_position_file(const string& file) {
     }
     int cur_num;
     for (int n_samp = 0; n_samp < num_samples_; n_samp++) {
-        x_num_file >> cur_num;
+        assert(x_num_file >> cur_num);
         x_file_position_.push_back(cur_num);
-        y_num_file >> cur_num;
+        assert(y_num_file >> cur_num);
         y_file_position_.push_back(cur_num);
     }
     

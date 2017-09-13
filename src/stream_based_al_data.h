@@ -73,9 +73,9 @@ class DataSet {
         /**
          * Load data points and labels from file
          *
-         * @param filename: file with data points and labels !! TODO:
-         * @param x_filename: file with data points only
-         * @param y_filename: file with labels only
+         * @param filename      : file with data points and labels !! TODO:
+         * @param x_filename    : file with data points only
+         * @param y_filename    : file with labels only
          */
         void load(const string& filename);
         void load(const string& x_filename, const string& y_filename,
@@ -90,7 +90,7 @@ class DataSet {
         inline void reset_position() {sample_pos_ = 0;};
 
         /* Class properties */
-        long int num_samples_;  /**< Number of samples in current file */
+        unsigned int num_samples_;  /**< Number of samples in current file */
         int feature_dim_;  /**< Feature dimension */
         int num_classes_;  /**< Number of classes */
 
@@ -99,7 +99,7 @@ class DataSet {
         const bool random_;  /**< Will select samples randomly */
         const bool sort_classes_;  /**< Samples are sorted after classes */
         const bool load_iterative_;  /**< Load data points one after another */
-        int sample_pos_;  /**< Saves currnet position of vector "samples_" */
+        unsigned int sample_pos_;  /**< Saves current position of vector "samples_" */
         vector<Sample> samples_;  /**< Vector with all samples */
         vector<long int> x_file_position_;  /**< Vector with absolute position
                                             of the beginning of a lint */

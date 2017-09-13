@@ -1,4 +1,4 @@
-# This is a make file for Mondrian forest package
+# This is a make file for the Mondrian forest package
 # -----------------------------------------------
 
 # Compiler options
@@ -8,8 +8,8 @@ INCLUDEPATH = -I/usr/include -I$(HOME)/local/include
 
 LINKPATH = -L/usr/lib -L$(HOME)/local/lib -L/usr/local/lib
 
-#CFLAGS = -c -Wall -DNDEBUG -Wno-deprecated -g 
-CFLAGS = -c -std=c++11 -O3 -march=native -mtune=native
+#CFLAGS = -c -Wall -DNDEBUG -Wno-deprecated -Wall -g
+CFLAGS = -c -std=c++11 -O3 -march=native -mtune=native -g
 LDFLAGS = -lconfig++ -lboost_serialization -larmadillo -llapack -lblas -lstdc++ -lm
 # Source directory and files
 SOURCEDIR = src

@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef STREAM_BASED_AL__RANDOM_H_
-#define STREAM_BASED_AL__RANDOM_H_
+#ifndef STREAM_BASED_AL_RANDOM_H_
+#define STREAM_BASED_AL_RANDOM_H_
 
 /*
  * Used to generate random numbers
@@ -23,14 +23,18 @@
 #include <boost/random/mersenne_twister.hpp>  /**< Random generator mt19937 */
 #include <boost/generator_iterator.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/discrete_distribution.hpp>
 #include <sys/time.h>
 
 #include "stream_based_al_utilities.h"
 
 using namespace std;
 
+
 /*---------------------------------------------------------------------------*/
-typedef boost::mt11213b base_generator_type;
+/**< Type of random generator */
+typedef boost::mt11213b base_generator_type;  /* mt11213b (faster), mt19937 */
+
 
 /*---------------------------------------------------------------------------*/
 class RandomGenerator {
@@ -39,26 +43,21 @@ class RandomGenerator {
 
         RandomGenerator();
 
+        void set_seed(unsigned int);
+    
         float rand_uniform_distribution();
         /**
-         * Generate value that is uniform distributed between min and max
+         * Generate value that is uniformly distributed between min and max
          */
         float rand_uniform_distribution(float min_value, float max_value);
-        /**
-         * Generate value that is uniform distributed between min and max
-         *
-         * @param equal_values  : return true if min_value == max_value
-         */
-        float rand_uniform_distribution(float min_value, float max_value,
-                bool& equal_values);
         float rand_exp_distribution(float lambda);
+        int rand_discrete_distribution(arma::fvec& scores);
 
     private:
-        static bool seed_flag_;
-        static base_generator_type generator;
+        base_generator_type generator; // base random number generator
 
+        static unsigned int init_seed();
         boost::uniform_real<float> uni_dist;
-        boost::exponential_distribution<float> exp_dist;
         boost::variate_generator<base_generator_type&,
             boost::uniform_real<float> > uni_gen;
 
@@ -66,19 +65,3 @@ class RandomGenerator {
 
 #endif /* STREAM_BASED_AL__RANDOM_H_ */
 /*---------------------------------------------------------------------------*/
-
-inline double init_seed() {
-    ifstream devFile("/dev/urandom", ios::binary);
-    unsigned int outInt = 0;
-    char tempChar[sizeof(outInt)];
-
-    devFile.read(tempChar, sizeof(outInt));
-    outInt = atoi(tempChar);
-
-    devFile.close();
-
-    struct timeval TV;
-    gettimeofday(&TV, NULL);
-    double seed = TV.tv_sec * TV.tv_usec + getpid() + outInt;
-    return seed;
-}

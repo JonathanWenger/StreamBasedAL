@@ -22,6 +22,9 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
 
     Config config_file;
     config_file.readFile(conf_file.c_str());
+    
+    /* General */
+    user_seed_config_ = static_cast<unsigned int> (config_file.lookup("General.seed"));
 
     /* Load data files */
     train_data_ = (const char *) config_file.lookup("Data.train_data");
@@ -40,9 +43,11 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
     num_trees_ = config_file.lookup("Mondrian.num_trees");
     init_budget_ = config_file.lookup("Mondrian.init_budget");
     discount_factor_ = config_file.lookup("Mondrian.discount_factor");
+    decision_prior_hyperparam_ = config_file.lookup("Mondrian.decision_prior_hyperparam");
     debug_ = (bool)config_file.lookup("Mondrian.debug"); 
     max_samples_in_one_node_ = config_file.lookup(
         "Mondrian.max_samples_in_one_node");
+    confidence_measure_ = (int) config_file.lookup("Mondrian.confidence_measure");
     print_properties_ = (bool)config_file.lookup("Mondrian.print_properties");
 
     /* Parameters for training */
@@ -51,6 +56,8 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
     active_learning_ = config_file.lookup("Training.active_learning");
     active_number_init_set_ = config_file.lookup(
         "Training.active_number_init_set");
+    active_number_max_set_ = config_file.lookup(
+        "Training.active_number_max_set");
     active_batch_size_ = config_file.lookup(
         "Training.active_batch_size");
     active_buffer_lowest_confidence_ = (bool)config_file.lookup(

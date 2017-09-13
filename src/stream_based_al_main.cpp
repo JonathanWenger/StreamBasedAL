@@ -23,7 +23,6 @@
 /* Mondrian libraries */
 #include "stream_based_al_forest.h"
 #include "stream_based_al_data.h"
-#include "stream_based_al_utilities.h"
 #include "stream_based_al_hyperparameters.h"
 #include "stream_based_al_experimenter.h"
 
@@ -99,7 +98,12 @@ int main(int argc, char *argv[]) {
      */
     /* Load hyperparameters of Mondrian forest */
     Hyperparameters hp(conf_file_name);
-
+    
+    /* Set the seed of the random number generator*/
+    if(hp.user_seed_config_ != 0){
+        rng.set_seed(hp.user_seed_config_);
+    }
+    
     cout << endl;
     cout << "------------------" << endl;
     cout << "Loading files  ..." << endl;
@@ -111,7 +115,7 @@ int main(int argc, char *argv[]) {
     dataset_test.load(hp.test_data_, hp.test_labels_);
     /* Set feature dimension */
     int feat_dim = dataset_train.feature_dim_;
-
+    
     /*
      * Set settings of Mondrian forest
      * ----------------------------------------------------
@@ -119,10 +123,13 @@ int main(int argc, char *argv[]) {
     mondrian_settings* settings = new mondrian_settings;
     settings->num_trees = hp.num_trees_; 
     settings->discount_factor = hp.discount_factor_;
+    settings->decision_prior_hyperparam = hp.decision_prior_hyperparam_;
     settings->discount_param = settings->discount_factor * float(feat_dim);
     settings->debug = hp.debug_;
     settings->max_samples_in_one_node = hp.max_samples_in_one_node_;
-
+    settings->confidence_measure = hp.confidence_measure_;
+    
+    
 /*---------------------------------------------------------------------------*/
     /* Initialize Mondrian forest */
     MondrianForest* forest = new MondrianForest(*settings, feat_dim);
@@ -137,6 +144,8 @@ int main(int argc, char *argv[]) {
       else
         experimenter.train(forest, dataset_train, hp);
     }
+    
+    
     if (testing) {
       double accuracy = experimenter.test(forest, dataset_test, hp);
 
@@ -152,6 +161,7 @@ int main(int argc, char *argv[]) {
       cout << endl;
 
     }
+
 
 /*---------------------------------------------------------------------------*/
     /*

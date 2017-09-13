@@ -29,8 +29,11 @@ class Hyperparameters {
         string train_labels_;  /**< Data with labels of training data */
         string test_data_;  /**< Data with testing data */
         string test_labels_;  /**< Data with labels of testing data */
+    
+        /* General */
+        unsigned int user_seed_config_; /**< Seed configuration for random number generation*/
 
-        /* Parameters how data should be load */
+        /* Parameters how data should be loaded */
         bool random_;  /**< Shuffle data randomly */
         bool iterative_;  /**< Jumps to define line in file and loads only
                             data of that line iteratively*/
@@ -42,9 +45,11 @@ class Hyperparameters {
         int num_trees_;  /**< Number of trees of Mondrian forest */
         float init_budget_;  /**< Initial budget of a Mondrian tree */
         float discount_factor_;  /**< Discount parameter of a Mondrian tree */
+        float decision_prior_hyperparam_; /**< Hyperparameter of the beta prior of each node */
         bool debug_;  /**< Debug mode */
         int max_samples_in_one_node_;  /**< Splits a node if this number
                                          is reached */
+        int confidence_measure_; /**< Type of confidence measure used in query */
         bool print_properties_;  /**< Print properties of a Mondrian Forest */
 
         /* Parameters for training */
@@ -61,6 +66,7 @@ class Hyperparameters {
         int active_learning_;  /**< Set active learning procedure */
         int active_number_init_set_;  /**< Number of training samples for the
                                        initial training round */
+        int active_number_max_set_;   /**< Maximum number of training samples used */
         int active_batch_size_;  /**< Batch size of a training round in the case
                                   of active learning */
         /**< Sets option to train classifier only with the samples
