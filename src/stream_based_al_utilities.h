@@ -26,10 +26,6 @@
 #include <list>
 
 
-
-//#define eps 0.00001
-#define eps 0
-
 using namespace std;
 
 /* 
@@ -73,18 +69,6 @@ inline string new_name(const string str, int numb) {
 }
 
 /*
- * Compares two float values (=)
- * (works only if small values are used)
- */
-inline bool equal(float A, float B) {
-    if (abs(A-B) < eps)
-        return true;
-    if (A == B)  /* Infinite values */
-        return true;
-    return false;
-}
-
-/*
  * Function checks if all elements have the same value
  */
 inline bool equal_elements(arma::fvec& prob) {
@@ -94,7 +78,7 @@ inline bool equal_elements(arma::fvec& prob) {
         unsigned int count = 1;
         for (unsigned int n = 1; n < prob.size(); n++) {
             float new_point = prob[n];
-            if (equal(tmp_point, new_point)) {
+            if (tmp_point == new_point) {
                 count++;
             }
             tmp_point = new_point;

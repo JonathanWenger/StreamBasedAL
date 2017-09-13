@@ -407,9 +407,7 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
     /* Compute posterior mean normalized stable */
     if (!is_leaf_) {
         assert(split_dim_ >= 0 && split_dim_ < sample.x.n_elem);
-        if (equal(sample.x[split_dim_],split_loc_) || sample.x[split_dim_]
-                < split_loc_) {
-
+        if (sample.x[split_dim_] <= split_loc_) {
             if (settings_->debug) 
                 cout << "left" << endl;
             pred_class = id_left_child_node_->predict_class(sample, pred_prob,
@@ -420,7 +418,7 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
             pred_class = id_right_child_node_->predict_class(sample, pred_prob,
                     prob_not_separated_yet, m_conf);
         }
-    } else if (is_leaf_ && (expo_param > 0) == false) {
+    } else if (is_leaf_ && (expo_param <= 0)) {
         pred_prob = compute_posterior_mean_normalized_stable(
                 cnt, discount, base) * prob_not_separated_yet;
     }
@@ -631,11 +629,15 @@ MondrianNode::compute_left_right_statistics(
     
     /* Calculate min and max boundary values */
     std::vector<arma::fvec>::iterator it = points.begin();
-    arma::fvec tmp_min(sample_x.size(), arma::fill::zeros);
-    arma::fvec tmp_max(sample_x.size(), arma::fill::zeros);
+    arma::fvec tmp_min(sample_x.size());
+    arma::fvec tmp_max(sample_x.size());
     if (it != points.end()) {
         tmp_min = *it;
         tmp_max = *it;
+    }else{
+        cout << "[ERROR] - MondrianNode::compute_left_right_statistics:"
+            "Could not initialize Mondrian block bounds." << endl;
+        exit(EXIT_FAILURE);
     }
     for ( ; it < points.end(); it++) {
        tmp_min = arma::min(tmp_min,*it); 
@@ -892,8 +894,7 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
                 - point lies outside block B^x_j and exponential
                   draw + old budget does NOT exceed budget
      */
-    if (equal(split_cost, max_split_costs_) == true || 
-            split_cost > max_split_costs_) {
+    if (split_cost >= max_split_costs_) {
         /* (1) Current budget is not enough */
         if (!is_leaf_) {    
             mondrian_block_->update_range_states(sample.x); 
@@ -956,7 +957,7 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
         int max_sample_search = mondrian_block_->get_feature_dim();
         int count_sample_search = 0;
         while (count_sample_search < max_sample_search) {
-            if (equal(min_block[split_dim_], max_block[split_dim_])) {
+            if (min_block[split_dim_] == max_block[split_dim_]) {
                 split_dim_ = rng.rand_discrete_distribution(min_block);
             } else {
                 break;
