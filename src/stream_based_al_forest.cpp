@@ -374,8 +374,7 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
     }
 
     /* Check if current sample lies outside */
-    // or expo_param > 0
-    if (greater_zero(expo_param)) {
+    if (expo_param > 0) {
         /* 
          * Compute expected discount d, where \delta is drawn from a truncated
          * exponential with rate \eta_j(x), truncated to the interval
@@ -421,7 +420,7 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
             pred_class = id_right_child_node_->predict_class(sample, pred_prob,
                     prob_not_separated_yet, m_conf);
         }
-    } else if (is_leaf_ && greater_zero(expo_param) == false) {
+    } else if (is_leaf_ && (expo_param > 0) == false) {
         pred_prob = compute_posterior_mean_normalized_stable(
                 cnt, discount, base) * prob_not_separated_yet;
     }
@@ -870,7 +869,7 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
 
     /* Exponential distribution */
     assert(!(split_cost < 0));
-    if (!greater_zero(expo_param)) {
+    if (expo_param <= 0) {
         split_cost = numeric_limits<float>::infinity();
     } else {
         /* Exponential distribution */
@@ -1396,7 +1395,7 @@ float MondrianForest::confidence_prediction(arma::fvec& pred_prob,
             second_class = pred_prob[i];
         }
     }
-    if (greater_zero(first_class) && greater_zero(second_class)) {
+    if ((first_class > 0) && (second_class > 0)) {
         confidence = 1 - (second_class / first_class);
     } else {
         confidence = first_class;

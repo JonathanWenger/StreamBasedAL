@@ -47,16 +47,9 @@ class RandomGenerator {
     
         float rand_uniform_distribution();
         /**
-         * Generate value that is uniform distributed between min and max
+         * Generate value that is uniformly distributed between min and max
          */
         float rand_uniform_distribution(float min_value, float max_value);
-        /**
-         * Generate value that is uniform distributed between min and max
-         *
-         * @param equal_values  : return true if min_value == max_value
-         */
-        float rand_uniform_distribution(float min_value, float max_value,
-                bool& equal_values);
         float rand_exp_distribution(float lambda);
         int rand_discrete_distribution(arma::fvec& scores);
 

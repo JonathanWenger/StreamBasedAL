@@ -83,15 +83,6 @@ inline bool equal(float A, float B) {
         return true;
     return false;
 }
-/*
- * Compares two float values (>)
- * (works only if small values are used)
- */
-inline bool greater_zero(float A) {
-    if (A > eps)
-        return true;
-    return false;
-}
 
 /*
  * Function checks if all elements have the same value

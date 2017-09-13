@@ -55,25 +55,6 @@ float RandomGenerator::rand_uniform_distribution() {
 
 float RandomGenerator::rand_uniform_distribution(
         float min_value, float max_value) {
-    if (equal(min_value,max_value)) {
-        max_value += eps; //TODO: find way around this, causes bugs down the road
-        //cout << "[WARNING]: - rand_uniform_distribution: min_value == max_value" << endl;
-    }
-    float rand_value = min_value + (max_value - min_value) * 
-        rand_uniform_distribution();
-
-    return rand_value;
-}
-
-float RandomGenerator::rand_uniform_distribution(
-        float min_value, float max_value, bool& equal_values) {
-    if (equal(min_value,max_value)) {
-        max_value += eps; //TODO: find way around this, causes bugs down the road
-        //cout << "[WARNING]: - rand_uniform_distribution: min_value == max_value" << endl;
-        equal_values = true;
-    } else {
-        equal_values = false;
-    }
     float rand_value = min_value + (max_value - min_value) * 
         rand_uniform_distribution();
 
@@ -81,9 +62,7 @@ float RandomGenerator::rand_uniform_distribution(
 }
 
 float RandomGenerator::rand_exp_distribution(float lambda) {
-    if (equal(lambda,0.0) || !greater_zero(lambda) ) {
-        lambda = 1;
-    }
+    assert(lambda > 0);
     boost::exponential_distribution<float> exp_dist(lambda);
     boost::variate_generator<base_generator_type&,
         boost::exponential_distribution<float> > exp_gen(generator, exp_dist);
