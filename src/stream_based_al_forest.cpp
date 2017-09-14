@@ -1380,41 +1380,34 @@ arma::fvec MondrianForest::predict_probability(Sample& sample,
 */
 float MondrianForest::confidence_prediction(arma::fvec& pred_prob,
         mondrian_confidence& m_conf) {
-    float confidence = 0.0;
+    float uncertainty = 0.0;
     
     if(settings_->confidence_measure == 0){
     /* Confidence: first best vs. second best */
-    float first_class = 0.0;
-    for (int i = 0; i < int(pred_prob.size()); i++) {
-        if (pred_prob[i] > first_class) {
-            first_class = pred_prob[i];
+        float first_class = max(pred_prob);
+        float second_class = 0.0;
+        for (int i = 0; i < int(pred_prob.size()); i++) {
+            if (pred_prob[i] > second_class && pred_prob[i] < first_class) {
+                second_class = pred_prob[i];
+            }
         }
-    }
-    float second_class = 0.0;
-    for (int i = 0; i < int(pred_prob.size()); i++) {
-        if (pred_prob[i] > second_class && pred_prob[i] < first_class) {
-            second_class = pred_prob[i];
-        }
-    }
-    if ((first_class > 0) && (second_class > 0)) {
-        confidence = 1 - (second_class / first_class);
-    } else {
-        confidence = first_class;
-    }
+        uncertainty = 1 - first_class + second_class;
     }
     else if(settings_->confidence_measure == 1){
     /* Confidence: normalized entropy */
-        float entropy = 0;
         assert(pred_prob.size() > 1);
         for (int i = 0; i < pred_prob.size(); i++){
             if(pred_prob(i) > 0)
-                entropy += -pred_prob(i)*log(pred_prob(i))/log(pred_prob.size());
+                uncertainty += -pred_prob(i)*log(pred_prob(i))/log(pred_prob.size());
         }
-        confidence = 1 - entropy;
+    }else if(settings_->confidence_measure == 2){
+        uncertainty = m_conf.normalized_density;
+    }else if(settings_->confidence_measure == 3){
+        uncertainty = rng.rand_uniform_distribution(0, 1);
     }
-        
-    /* Take normalized density account */
-    float lambda = 0;
-    float new_confidence = (confidence + lambda*m_conf.normalized_density)/(1+lambda);
-    return new_confidence;
+
+    float beta = .0;
+    float confidence = 1 - uncertainty * pow((m_conf.normalized_density),beta);
+    
+    return confidence;
 }

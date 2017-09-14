@@ -102,7 +102,7 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
 
   cout << endl;
   cout << "-------------------------------------" << endl;
-  cout << "Start training (active learning " << 
+  cout << "Start training (active learning " <<
     hp.active_learning_ << ")..." << endl;
   cout << "-------------------------------------" << endl;
   
@@ -137,12 +137,12 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
     for (int long i_samp = 0; i_samp < number_training_samples ; i_samp++) {
         Sample sample = dataset.get_next_sample();
 
-        if (i_samp < hp.active_number_init_set_) {
+        if (i_samp < hp.active_init_set_size_) {
             mf->update(sample);
             pResult_ -> samples_used_for_training_++;
         } else {
             /* Stop training if the number of samples used for training is larger than specified */
-            if (pResult_->samples_used_for_training_ == hp.active_number_max_set_){
+            if (pResult_->samples_used_for_training_ == hp.active_max_num_queries_){
                 break;
             }
             pair<int, float> pred = mf->predict_class_confident(sample);
@@ -166,12 +166,12 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
     for (int long i_samp = 0; i_samp < number_training_samples; i_samp++) {
       Sample sample = dataset.get_next_sample();
 
-      if (i_samp < hp.active_number_init_set_) {
+      if (i_samp < hp.active_init_set_size_) {
         mf->update(sample);
         pResult_ -> samples_used_for_training_++;
       } else {
           /* Stop training if the number of samples used for training is larger than specified */
-          if (pResult_->samples_used_for_training_ == hp.active_number_max_set_){
+          if (pResult_->samples_used_for_training_ == hp.active_max_num_queries_){
               break;
           }
 

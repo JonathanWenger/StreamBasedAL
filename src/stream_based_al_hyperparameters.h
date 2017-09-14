@@ -32,6 +32,7 @@ class Hyperparameters {
     
         /* General */
         unsigned int user_seed_config_; /**< Seed configuration for random number generation*/
+        unsigned int num_runs_; /**< Number of training and testing runs*/
 
         /* Parameters how data should be loaded */
         bool random_;  /**< Shuffle data randomly */
@@ -64,14 +65,13 @@ class Hyperparameters {
          *                         of the training set for training
          */
         int active_learning_;  /**< Set active learning procedure */
-        int active_number_init_set_;  /**< Number of training samples for the
+        int active_init_set_size_;  /**< Number of training samples for the
                                        initial training round */
-        int active_number_max_set_;   /**< Maximum number of training samples used */
+        int active_max_num_queries_;   /**< Maximum number of training samples used */
         int active_batch_size_;  /**< Batch size of a training round in the case
                                   of active learning */
         /**< Sets option to train classifier only with the samples
           with a low confidence (percentage) */
-        bool active_buffer_lowest_confidence_;
         int active_buffer_size_;  /**< Percentage of samples that have
                                          a low confidence and are used to train
                                          the classifier */

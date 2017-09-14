@@ -131,43 +131,85 @@ int main(int argc, char *argv[]) {
     
     
 /*---------------------------------------------------------------------------*/
-    /* Initialize Mondrian forest */
-    MondrianForest* forest = new MondrianForest(*settings, feat_dim);
     
-    /* Initialize experimenter class */
-    Experimenter experimenter(conf_value);
+    /* Initialize result vector */
+    vector<Result> result_vector;
+    assert(hp.num_runs_ > 0);
     
-    if (training) {
-      /* Option between active learning and without */
-      if (hp.active_learning_ > 0)
-        experimenter.train_active(forest, dataset_train, hp);
-      else
-        experimenter.train(forest, dataset_train, hp);
+    for (int i = 0; i < hp.num_runs_; i++){
+        cout << endl;
+        cout << "-------------------- Run " << i + 1 << "/";
+        cout << hp.num_runs_ << " -----------------------" << endl;
+        
+        /* Initialize Mondrian forest */
+        MondrianForest* forest = new MondrianForest(*settings, feat_dim);
+        
+        /* Initialize experimenter class */
+        Experimenter experimenter(conf_value);
+        
+        if (training) {
+          /* Option between active learning and without */
+          if (hp.active_learning_ > 0)
+            experimenter.train_active(forest, dataset_train, hp);
+          else
+            experimenter.train(forest, dataset_train, hp);
+            
+          dataset_train.reset_position();
+        }
+        
+        
+        if (testing) {
+          double accuracy = experimenter.test(forest, dataset_test, hp);
+
+          cout << endl;
+          cout << "------------------" << endl;
+          cout << "Properties:       " << endl;
+          cout << "------------------" << endl;
+          cout << "Accuracy: \t" << accuracy << endl;
+          cout << endl;
+          Result result = experimenter.get_detailed_result();
+          result_vector.push_back(result);
+          cout << "Samples used for training: "
+            << result.samples_used_for_training_ << endl;
+          cout << endl;
+        
+          dataset_test.reset_position();
+
+        }
+        
+        // Free space
+        delete forest;
     }
     
-    
-    if (testing) {
-      double accuracy = experimenter.test(forest, dataset_test, hp);
+    /*
+     *  Compute the average results of all runs
+     */
+    if (hp.num_runs_ > 1){
+        cout << endl;
+        cout << "------------------------------" << endl;
+        cout << "Average results (" << hp.num_runs_ << " runs):" << endl;
+        cout << "------------------------------" << endl;
 
-      cout << endl;
-      cout << "------------------" << endl;
-      cout << "Properties:       " << endl;
-      cout << "------------------" << endl;
-      cout << "Accuracy: \t" << accuracy << endl;
-      cout << endl;
-      Result result = experimenter.get_detailed_result();
-      cout << "Samples used for training: "
-        << result.samples_used_for_training_ << endl;
-      cout << endl;
-
+        
+        float avg_accuracy = 0;
+        float avg_samples_used_for_training = 0;
+        for (int i = 0; i < hp.num_runs_; i++){
+            avg_accuracy += result_vector[i].accuracy_/hp.num_runs_;
+            avg_samples_used_for_training +=
+                (float)result_vector[i].samples_used_for_training_/(float)hp.num_runs_;
+        }
+        
+        cout << "Accuracy: \t" << avg_accuracy << endl;
+        cout << endl;
+        cout << "Samples used for training: "
+        << avg_samples_used_for_training << endl;
+        cout << endl;
     }
-
 
 /*---------------------------------------------------------------------------*/
     /*
      * Free Space
      */
-    delete forest;
     delete settings;
 
     return 0;

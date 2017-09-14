@@ -25,6 +25,7 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
     
     /* General */
     user_seed_config_ = static_cast<unsigned int> (config_file.lookup("General.seed"));
+    num_runs_ = static_cast<unsigned int> (config_file.lookup("General.num_runs"));
 
     /* Load data files */
     train_data_ = (const char *) config_file.lookup("Data.train_data");
@@ -54,14 +55,12 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
     number_of_samples_for_training_ = config_file.lookup(
         "Training.number_of_samples_for_training");
     active_learning_ = config_file.lookup("Training.active_learning");
-    active_number_init_set_ = config_file.lookup(
-        "Training.active_number_init_set");
-    active_number_max_set_ = config_file.lookup(
-        "Training.active_number_max_set");
+    active_init_set_size_ = config_file.lookup(
+        "Training.active_init_set_size");
+    active_max_num_queries_ = config_file.lookup(
+        "Training.active_max_num_queries");
     active_batch_size_ = config_file.lookup(
         "Training.active_batch_size");
-    active_buffer_lowest_confidence_ = (bool)config_file.lookup(
-        "Training.active_buffer_lowest_confidence");
     active_buffer_size_ = config_file.lookup(
         "Training.active_buffer_size");
     active_confidence_value_ = config_file.lookup(
