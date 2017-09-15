@@ -72,6 +72,7 @@ struct mondrian_settings {
     bool debug;
     int max_samples_in_one_node;
     int confidence_measure;
+    float density_exponent;
 };
 /*---------------------------------------------------------------------------*/
 /**

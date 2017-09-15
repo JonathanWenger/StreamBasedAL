@@ -1406,7 +1406,7 @@ float MondrianForest::confidence_prediction(arma::fvec& pred_prob,
         uncertainty = rng.rand_uniform_distribution(0, 1);
     }
 
-    float beta = .0;
+    float beta = settings_->density_exponent;
     float confidence = 1 - uncertainty * pow((m_conf.normalized_density),beta);
     
     return confidence;

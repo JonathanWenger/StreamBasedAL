@@ -51,6 +51,7 @@ class Hyperparameters {
         int max_samples_in_one_node_;  /**< Splits a node if this number
                                          is reached */
         int confidence_measure_; /**< Type of confidence measure used in query */
+        float density_exponent_;    /** Exponent of the density term in the query measure */
         bool print_properties_;  /**< Print properties of a Mondrian Forest */
 
         /* Parameters for training */
