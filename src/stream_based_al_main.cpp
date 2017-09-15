@@ -147,36 +147,42 @@ int main(int argc, char *argv[]) {
         /* Initialize experimenter class */
         Experimenter experimenter(conf_value);
         
-        if (training) {
-          /* Option between active learning and without */
-          if (hp.active_learning_ > 0)
-            experimenter.train_active(forest, dataset_train, hp);
-          else
-            experimenter.train(forest, dataset_train, hp);
+        int max_num_queries = hp.active_max_num_queries_;
+        float num_query_steps = 5;
+        
+        for (int j = 0; j < num_query_steps; j++){ //TODO: add this to configuration file
+            hp.active_max_num_queries_ = (int)max_num_queries*(float)(j+1)/num_query_steps;
             
-          dataset_train.reset_position();
-        }
-        
-        
-        if (testing) {
-          double accuracy = experimenter.test(forest, dataset_test, hp);
+            if (training) {
+              /* Option between active learning and without */
+              if (hp.active_learning_ > 0)
+                experimenter.train_active(forest, dataset_train, hp);
+              else
+                experimenter.train(forest, dataset_train, hp);
+            }
+            
+            
+            if (testing) {
+                dataset_test.reset_position();
+                double accuracy = experimenter.test(forest, dataset_test, hp);
 
-          cout << endl;
-          cout << "------------------" << endl;
-          cout << "Properties:       " << endl;
-          cout << "------------------" << endl;
-          cout << "Accuracy: \t" << accuracy << endl;
-          cout << endl;
-          Result result = experimenter.get_detailed_result();
-          result_vector.push_back(result);
-          cout << "Samples used for training: "
-            << result.samples_used_for_training_ << endl;
-          cout << endl;
-        
-          dataset_test.reset_position();
-
+                if(j == 0){
+                  cout << endl;
+                  cout << "------------------" << endl;
+                  cout << "Properties:       " << endl;
+                  cout << "------------------" << endl;
+                }
+                cout << "Accuracy: \t" << accuracy << endl;
+                cout << endl;
+                Result result = experimenter.get_detailed_result();
+                result_vector.push_back(result);
+                cout << "Samples used for training: "
+                << result.samples_used_for_training_ << endl;
+                cout << endl;
+            }
+            
         }
-        
+        dataset_train.reset_position();
         // Free space
         delete forest;
     }

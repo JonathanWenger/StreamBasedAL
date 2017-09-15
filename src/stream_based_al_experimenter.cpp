@@ -228,7 +228,6 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
 double Experimenter::test(MondrianForest* mf, DataSet& dataset,
     Hyperparameters& hp) {
 
-
   cout << endl;
   cout << "-----------------" << endl;
   cout << "Start testing ..." << endl;
@@ -247,7 +246,7 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
 
 
   /* Initialize progress bar */
-  unsigned int expected_count= dataset.num_samples_;
+  unsigned int expected_count = dataset.num_samples_;
   /* Display training progress */
   boost::progress_display show_progress( expected_count );
   
@@ -273,7 +272,7 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
       pred_class = pred.first;
       conf_pos = int((pred.second * 100) / 5);
 
-      if (conf_pos <= 20) {
+      if (conf_pos <= 20) { //TODO: understand and fix this
         if (conf_pos == 20)
           conf_pos = 19;
         if (pred_class == sample.y) {
