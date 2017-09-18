@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
     
     /* Initialize result vector */
     vector<Result> result_vector;
-    assert(hp.num_runs_ > 0);
     
     for (int i = 0; i < hp.num_runs_; i++){
         cout << endl;
@@ -148,10 +147,10 @@ int main(int argc, char *argv[]) {
         Experimenter experimenter(conf_value);
         
         int max_num_queries = hp.active_max_num_queries_;
-        float num_query_steps = 5;
+        float num_query_steps = 5; //TODO: add this to configuration file
         
-        for (int j = 0; j < num_query_steps; j++){ //TODO: add this to configuration file
-            hp.active_max_num_queries_ = (int)max_num_queries*(float)(j+1)/num_query_steps;
+        for (int j = 0; j < num_query_steps; j++){
+            hp.active_max_num_queries_ = (int)(max_num_queries/num_query_steps);
             
             if (training) {
               /* Option between active learning and without */
@@ -176,8 +175,8 @@ int main(int argc, char *argv[]) {
                 cout << endl;
                 Result result = experimenter.get_detailed_result();
                 result_vector.push_back(result);
-                cout << "Samples used for training: "
-                << result.samples_used_for_training_ << endl;
+                cout << "Total samples used for training: "
+                << (max_num_queries*(j+1)/num_query_steps) << endl;
                 cout << endl;
             }
             

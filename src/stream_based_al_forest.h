@@ -521,6 +521,8 @@ class MondrianForest {
          * Predict class and return confidence
          */
         pair<int, float> predict_class_confident(Sample& sample);
+    
+        float get_data_counter() const;
 
         void print_info();
         

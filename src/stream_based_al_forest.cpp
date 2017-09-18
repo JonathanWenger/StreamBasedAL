@@ -1353,6 +1353,10 @@ void MondrianForest::print_info() {
     }
 }
 
+float MondrianForest::get_data_counter() const{
+    return data_counter_;
+}
+
 /*
 * Calculates probability of current sample
 * (returns probability of all classes)

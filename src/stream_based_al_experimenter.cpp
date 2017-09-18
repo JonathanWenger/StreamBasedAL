@@ -137,7 +137,8 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
     for (int long i_samp = 0; i_samp < number_training_samples ; i_samp++) {
         Sample sample = dataset.get_next_sample();
 
-        if (i_samp < hp.active_init_set_size_) {
+        if (mf->get_data_counter() < hp.active_init_set_size_) {
+            /* Initial training set without active learning */
             mf->update(sample);
             pResult_ -> samples_used_for_training_++;
         } else {
@@ -166,7 +167,7 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
     for (int long i_samp = 0; i_samp < number_training_samples; i_samp++) {
       Sample sample = dataset.get_next_sample();
 
-      if (i_samp < hp.active_init_set_size_) {
+      if (mf->get_data_counter() < hp.active_init_set_size_) {
         mf->update(sample);
         pResult_ -> samples_used_for_training_++;
       } else {
@@ -322,6 +323,7 @@ double Experimenter::evaluate_results(DataSet& dataset_test) {
   unsigned int same_elements = 0;
   for (unsigned int n_elem = 0; n_elem < pResult_ -> result_prediction_.size();
           n_elem++) {
+      
       Sample sample = dataset_test.get_next_sample();
       if (pResult_ -> result_prediction_[n_elem] == sample.y) {
           same_elements++;
