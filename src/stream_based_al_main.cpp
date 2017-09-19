@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
                     (float)result_vector[i][j].samples_used_for_training_/(float)hp.num_runs_;
             }
             cout << "Accuracy: " << avg_accuracy[j] << "\t";
-            cout << "Samples : " << avg_samples_used_for_training[j] << endl;
+            cout << "Samples: " << avg_samples_used_for_training[j] << endl;
         }
     }
 
