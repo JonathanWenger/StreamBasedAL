@@ -48,6 +48,7 @@ class Experimenter {
     *
     */
     void train(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp);
+    void train(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp, unsigned int n_runs);
 
     /**
     * Function trains a mondrian forest in an active learning setting
@@ -60,7 +61,7 @@ class Experimenter {
     *
     */
     void train_active(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp);
-
+    void train_active(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp, unsigned int n_runs);
     /**
      * Function tests/evaluates a mondrian forest
      * 

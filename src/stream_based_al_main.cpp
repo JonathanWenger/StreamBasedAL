@@ -140,17 +140,17 @@ int main(int argc, char *argv[]) {
         cout << "-------------------- Run " << i + 1 << "/";
         cout << hp.num_runs_ << " -----------------------" << endl;
         
-        /* Initialize Mondrian forest */
-        MondrianForest* forest = new MondrianForest(*settings, feat_dim);
-        
-        /* Initialize experimenter class */
-        Experimenter experimenter(conf_value);
-        
         int max_num_queries = hp.active_max_num_queries_;
         float num_query_steps = 5; //TODO: add this to configuration file
         
         for (int j = 0; j < num_query_steps; j++){
             hp.active_max_num_queries_ = (int)(max_num_queries/num_query_steps);
+            
+            /* Initialize Mondrian forest */
+            MondrianForest* forest = new MondrianForest(*settings, feat_dim);
+            
+            /* Initialize experimenter class */
+            Experimenter experimenter(conf_value);
             
             if (training) {
               /* Option between active learning and without */
@@ -180,10 +180,11 @@ int main(int argc, char *argv[]) {
                 cout << endl;
             }
             
+            dataset_train.reset_position();
+            // Free space
+            delete forest;
+            
         }
-        dataset_train.reset_position();
-        // Free space
-        delete forest;
     }
     
     /*
