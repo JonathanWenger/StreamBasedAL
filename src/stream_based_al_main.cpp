@@ -133,18 +133,17 @@ int main(int argc, char *argv[]) {
 /*---------------------------------------------------------------------------*/
     
     /* Initialize result vector */
-    vector<Result> result_vector;
+    const int num_query_steps = hp.active_num_query_steps_; //TODO: add this to configuration file
+    int max_num_queries = hp.active_max_num_queries_;
+    Result result_vector[hp.num_runs_][num_query_steps];
     
     for (int i = 0; i < hp.num_runs_; i++){
         cout << endl;
         cout << "-------------------- Run " << i + 1 << "/";
         cout << hp.num_runs_ << " -----------------------" << endl;
         
-        int max_num_queries = hp.active_max_num_queries_;
-        float num_query_steps = 5; //TODO: add this to configuration file
-        
         for (int j = 0; j < num_query_steps; j++){
-            hp.active_max_num_queries_ = (int)(max_num_queries/num_query_steps);
+            hp.active_max_num_queries_ = ((float)max_num_queries*(j+1))/num_query_steps;
             
             /* Initialize Mondrian forest */
             MondrianForest* forest = new MondrianForest(*settings, feat_dim);
@@ -165,18 +164,16 @@ int main(int argc, char *argv[]) {
                 dataset_test.reset_position();
                 double accuracy = experimenter.test(forest, dataset_test, hp);
 
-                if(j == 0){
-                  cout << endl;
-                  cout << "------------------" << endl;
-                  cout << "Properties:       " << endl;
-                  cout << "------------------" << endl;
-                }
+                cout << endl;
+                cout << "------------------" << endl;
+                cout << "Properties:       " << endl;
+                cout << "------------------" << endl;
                 cout << "Accuracy: \t" << accuracy << endl;
                 cout << endl;
                 Result result = experimenter.get_detailed_result();
-                result_vector.push_back(result);
+                result_vector[i][j] = result;
                 cout << "Total samples used for training: "
-                << (max_num_queries*(j+1)/num_query_steps) << endl;
+                << result.samples_used_for_training_ << endl;
                 cout << endl;
             }
             
@@ -197,19 +194,20 @@ int main(int argc, char *argv[]) {
         cout << "------------------------------" << endl;
 
         
-        float avg_accuracy = 0;
-        float avg_samples_used_for_training = 0;
-        for (int i = 0; i < hp.num_runs_; i++){
-            avg_accuracy += result_vector[i].accuracy_/hp.num_runs_;
-            avg_samples_used_for_training +=
-                (float)result_vector[i].samples_used_for_training_/(float)hp.num_runs_;
-        }
+        float avg_accuracy[num_query_steps];
+        float avg_samples_used_for_training[num_query_steps];
         
-        cout << "Accuracy: \t" << avg_accuracy << endl;
-        cout << endl;
-        cout << "Samples used for training: "
-        << avg_samples_used_for_training << endl;
-        cout << endl;
+        for (int j = 0; j < num_query_steps; j++){
+            avg_accuracy[j] = 0;
+            avg_samples_used_for_training[j] = 0;
+            for (int i = 0; i < hp.num_runs_; i++){
+                avg_accuracy[j] += result_vector[i][j].accuracy_/hp.num_runs_;
+                avg_samples_used_for_training[j] +=
+                    (float)result_vector[i][j].samples_used_for_training_/(float)hp.num_runs_;
+            }
+            cout << "Accuracy: " << avg_accuracy[j] << "\t";
+            cout << "Samples : " << avg_samples_used_for_training[j] << endl;
+        }
     }
 
 /*---------------------------------------------------------------------------*/
@@ -220,3 +218,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+

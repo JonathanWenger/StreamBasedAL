@@ -68,6 +68,8 @@ class Hyperparameters {
         int active_init_set_size_;  /**< Number of training samples for the
                                        initial training round */
         int active_max_num_queries_;   /**< Maximum number of training samples used */
+        int active_num_query_steps_;   /**< Number of intermediate results saved,
+                                        when training with fixed number of max queries */
         int active_batch_size_;  /**< Batch size of a training round in the case
                                   of active learning */
         /**< Sets option to train classifier only with the samples

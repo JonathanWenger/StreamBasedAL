@@ -59,6 +59,8 @@ Hyperparameters::Hyperparameters(const string& conf_file) {
         "Training.active_init_set_size");
     active_max_num_queries_ = config_file.lookup(
         "Training.active_max_num_queries");
+    active_num_query_steps_ = config_file.lookup(
+        "Training.active_num_query_steps");
     active_batch_size_ = config_file.lookup(
         "Training.active_batch_size");
     active_buffer_size_ = config_file.lookup(
