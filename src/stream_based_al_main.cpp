@@ -128,6 +128,7 @@ int main(int argc, char *argv[]) {
     settings->debug = hp.debug_;
     settings->max_samples_in_one_node = hp.max_samples_in_one_node_;
     settings->confidence_measure = hp.confidence_measure_;
+    settings->density_exponent = hp.density_exponent_;
     
     
 /*---------------------------------------------------------------------------*/
