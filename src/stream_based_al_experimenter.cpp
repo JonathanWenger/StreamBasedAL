@@ -308,7 +308,7 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
   cout << tmp_testing_time << " seconds." << endl;
   
   /* Evaluate test results */
-  pResult_ -> accuracy_ = evaluate_results(dataset);
+  compute_metrics(dataset);
 
   return pResult_ -> accuracy_; 
 }
@@ -317,7 +317,7 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
 /**
  * Evaluate test results
  */
-double Experimenter::evaluate_results(DataSet& dataset_test) {
+void Experimenter::compute_metrics(DataSet& dataset_test) {
 
     dataset_test.reset_position();
     
@@ -328,36 +328,39 @@ double Experimenter::evaluate_results(DataSet& dataset_test) {
     pResult_->true_negatives_.zeros(dataset_test.num_classes_);
     pResult_->precision_.zeros(dataset_test.num_classes_);
     pResult_->recall_.zeros(dataset_test.num_classes_);
+    pResult_->confusion_matrix_.zeros(dataset_test.num_classes_, dataset_test.num_classes_);
 
-    // Evaluate predictions and save TP, FP and FN
+    // Evaluate predictions, compute the confusion matrix and save TP, FP, TN and FN
     unsigned int same_elements = 0;
     for (unsigned int n_elem = 0; n_elem < pResult_ -> result_prediction_.size();
           n_elem++) {
       
-      Sample sample = dataset_test.get_next_sample();
-      if (pResult_ -> result_prediction_[n_elem] == sample.y) {
+        Sample sample = dataset_test.get_next_sample();
+        if (pResult_ -> result_prediction_[n_elem] == sample.y) {
           same_elements++;
           pResult_ -> result_correct_prediction_.push_back(1);
-          pResult_->true_positives_[sample.y] += 1;
+          pResult_->true_positives_(sample.y) += 1;
           for(int i = 0; i < dataset_test.num_classes_; i++){
               if(i != sample.y)
-                  pResult_->true_negatives_[sample.y] += 1;
+                  pResult_->true_negatives_(i) += 1;
           }
-      } else {
+        } else {
           pResult_ -> result_correct_prediction_.push_back(0);
-          pResult_->false_positives_[pResult_ -> result_prediction_[n_elem]] += 1;
-          pResult_->false_negatives_[sample.y] += 1;
-      }
+          pResult_->false_positives_(pResult_ -> result_prediction_[n_elem]) += 1;
+          pResult_->false_negatives_(sample.y) += 1;
+        }
+        pResult_->confusion_matrix_(pResult_->result_prediction_[n_elem], sample.y) += 1;
     }
+    pResult_->confusion_matrix_ = pResult_->confusion_matrix_/pResult_->result_prediction_.size();
     
     // Compute precision and recall for all classes (1vsAll)
     for (int i = 0; i < dataset_test.num_classes_; i++){
-        if((pResult_->true_positives_[i] + pResult_->false_positives_[i]) > 0)
-            pResult_->precision_[i] = pResult_->true_positives_[i]
-                /(pResult_->true_positives_[i] + pResult_->false_positives_[i]);
-        if (pResult_->true_positives_[i] + pResult_->false_negatives_[i] > 0)
-            pResult_->recall_[i] = pResult_->true_positives_[i]
-                /(pResult_->true_positives_[i] + pResult_->false_negatives_[i]);
+        if((pResult_->true_positives_(i) + pResult_->false_positives_(i)) > 0)
+            pResult_->precision_(i) = pResult_->true_positives_(i)
+                /(pResult_->true_positives_(i) + pResult_->false_positives_(i));
+        if (pResult_->true_positives_(i) + pResult_->false_negatives_(i) > 0)
+            pResult_->recall_(i) = pResult_->true_positives_(i)
+                /(pResult_->true_positives_(i) + pResult_->false_negatives_(i));
     }
     
     // Compute micro averages
@@ -371,13 +374,11 @@ double Experimenter::evaluate_results(DataSet& dataset_test) {
     pResult_->macro_avg_recall_ = arma::accu(pResult_->recall_)/pResult_->precision_.size();
     
     // Compute accuracy
-    float accuracy = 0.0;
     if (same_elements != 0) {
-      accuracy = (float) same_elements / pResult_ -> result_prediction_.size();
+        pResult_->accuracy_ = (float) same_elements / pResult_ -> result_prediction_.size();
     } else {
-      accuracy = 0.0;
+        pResult_->accuracy_ = 0.0;
     }
-    return accuracy;
 }
 /**
  * Return training time

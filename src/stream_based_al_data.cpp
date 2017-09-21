@@ -29,7 +29,6 @@ Result::Result() :
     micro_avg_recall_(0.0),
     macro_avg_precision_(0.0),
     macro_avg_recall_(0.0){
-      
 }
 
 

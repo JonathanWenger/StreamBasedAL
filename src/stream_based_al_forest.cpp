@@ -394,7 +394,8 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
             (-(exp(-(expo_param + settings_->discount_param) *
              max_split_costs_) - 1)) / 
             (-(exp(-expo_param * max_split_costs_)-1));
-
+        
+        assert(num_customers > 0);
         float discount_per_num_customers = discount / num_customers;
         arma::fvec pred_prob_tmp = (num_tables * discount_per_num_customers *
             base) + (cnt_f / num_customers) - (discount_per_num_customers * 
@@ -433,6 +434,10 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
             pred_class = i;
         }
     }
+    
+    
+    assert(pred_class > -1);
+    
     return pred_class;
 }
 
@@ -1316,6 +1321,7 @@ int MondrianForest::predict_class(Sample& sample) {
             pred_class = i;
         }
     }
+    
     return pred_class;
 }
 /**

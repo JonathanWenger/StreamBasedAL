@@ -97,12 +97,9 @@ class Experimenter {
     Result* pResult_;  /** Saves all results in a defined structure */
 
     /**
-     * Evaluate test results
-     *
-     * Output parameter:
-     *  - returns accuracy
+     * Compute metrics of the classification result
      */
-    double evaluate_results(DataSet& dataset_test);
+    void compute_metrics(DataSet& dataset_test);
 
 };
 

@@ -63,6 +63,8 @@ class Result {
     arma::fvec false_negatives_;
     arma::fvec true_negatives_;
     
+    arma::fmat confusion_matrix_;
+    
     arma::fvec precision_;            /** TP/(TP+FP) for each class */
     arma::fvec recall_;               /** TP/(TP+FN) for each class */
     /** micro average: global count of TP, FP, TN and FN */
