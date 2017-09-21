@@ -182,7 +182,6 @@ int main(int argc, char *argv[]) {
             dataset_train.reset_position();
             // Free space
             delete forest;
-            
         }
     }
     

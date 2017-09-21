@@ -58,6 +58,11 @@ class Result {
     /**< Save all false predicted confidence values */
     arma::Col<arma::uword> confidence_false_;
     
+    arma::fvec true_positives_;
+    arma::fvec false_positives_;
+    arma::fvec false_negatives_;
+    arma::fvec true_negatives_;
+    
     arma::fvec precision_;            /** TP/(TP+FP) for each class */
     arma::fvec recall_;               /** TP/(TP+FN) for each class */
     /** micro average: global count of TP, FP, TN and FN */

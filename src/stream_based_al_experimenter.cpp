@@ -322,10 +322,10 @@ double Experimenter::evaluate_results(DataSet& dataset_test) {
     dataset_test.reset_position();
     
     // Initialize metrics
-    arma::fvec true_positives(dataset_test.num_classes_, arma::fill::zeros);
-    arma::fvec false_positives(dataset_test.num_classes_, arma::fill::zeros);
-    arma::fvec false_negatives(dataset_test.num_classes_, arma::fill::zeros);
-
+    pResult_->true_positives_.zeros(dataset_test.num_classes_);
+    pResult_->false_positives_.zeros(dataset_test.num_classes_);
+    pResult_->false_negatives_.zeros(dataset_test.num_classes_);
+    pResult_->true_negatives_.zeros(dataset_test.num_classes_);
     pResult_->precision_.zeros(dataset_test.num_classes_);
     pResult_->recall_.zeros(dataset_test.num_classes_);
 
@@ -338,27 +338,33 @@ double Experimenter::evaluate_results(DataSet& dataset_test) {
       if (pResult_ -> result_prediction_[n_elem] == sample.y) {
           same_elements++;
           pResult_ -> result_correct_prediction_.push_back(1);
-          true_positives[pResult_ -> result_prediction_[n_elem]] += 1;
+          pResult_->true_positives_[sample.y] += 1;
+          for(int i = 0; i < dataset_test.num_classes_; i++){
+              if(i != sample.y)
+                  pResult_->true_negatives_[sample.y] += 1;
+          }
       } else {
           pResult_ -> result_correct_prediction_.push_back(0);
-          false_positives[pResult_ -> result_prediction_[n_elem]] += 1;
-          false_negatives[sample.y] += 1;
+          pResult_->false_positives_[pResult_ -> result_prediction_[n_elem]] += 1;
+          pResult_->false_negatives_[sample.y] += 1;
       }
     }
     
     // Compute precision and recall for all classes (1vsAll)
     for (int i = 0; i < dataset_test.num_classes_; i++){
-        if((true_positives[i] + false_positives[i]) > 0)
-            pResult_->precision_[i] = true_positives[i]/(true_positives[i] + false_positives[i]);
-        if (true_positives[i] + false_negatives[i])
-            pResult_->recall_[i] = true_positives[i]/(true_positives[i] + false_negatives[i]);
+        if((pResult_->true_positives_[i] + pResult_->false_positives_[i]) > 0)
+            pResult_->precision_[i] = pResult_->true_positives_[i]
+                /(pResult_->true_positives_[i] + pResult_->false_positives_[i]);
+        if (pResult_->true_positives_[i] + pResult_->false_negatives_[i] > 0)
+            pResult_->recall_[i] = pResult_->true_positives_[i]
+                /(pResult_->true_positives_[i] + pResult_->false_negatives_[i]);
     }
     
     // Compute micro averages
-    pResult_->micro_avg_precision_ = arma::accu(true_positives)/
-        (arma::accu(true_positives) + arma::accu(false_positives));
-    pResult_->micro_avg_recall_ = arma::accu(true_positives)/
-        (arma::accu(true_positives) + arma::accu(false_negatives));
+    pResult_->micro_avg_precision_ = arma::accu(pResult_->true_positives_)/
+        (arma::accu(pResult_->true_positives_) + arma::accu(pResult_->false_positives_));
+    pResult_->micro_avg_recall_ = arma::accu(pResult_->true_positives_)/
+        (arma::accu(pResult_->true_positives_) + arma::accu(pResult_->false_negatives_));
     
     // Compute macro averages
     pResult_->macro_avg_precision_ = arma::accu(pResult_->precision_)/pResult_->precision_.size();
