@@ -19,13 +19,19 @@
  * Result
  */
 Result::Result() :
-  training_time_(0.0),
-  testing_time_(0.0),
-  accuracy_(0.0),
-  samples_used_for_training_(0),
-  confidence_(20, arma::fill::zeros),
-  confidence_false_(20, arma::fill::zeros) {
+    training_time_(0.0),
+    testing_time_(0.0),
+    accuracy_(0.0),
+    samples_used_for_training_(0),
+    confidence_(20, arma::fill::zeros),
+    confidence_false_(20, arma::fill::zeros),
+    micro_avg_precision_(0.0),
+    micro_avg_recall_(0.0),
+    macro_avg_precision_(0.0),
+    macro_avg_recall_(0.0){
+      
 }
+
 
 /*---------------------------------------------------------------------------*/
 /*

@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include <iomanip>
 /* Armadillo */
 #include <armadillo>
 /* Boost */
@@ -134,9 +135,9 @@ int main(int argc, char *argv[]) {
 /*---------------------------------------------------------------------------*/
     
     /* Initialize result vector */
-    const int num_query_steps = hp.active_num_query_steps_; //TODO: add this to configuration file
+    const int num_query_steps = hp.active_num_query_steps_;
     int max_num_queries = hp.active_max_num_queries_;
-    Result result_vector[hp.num_runs_][num_query_steps];
+    Result result_arr[hp.num_runs_][num_query_steps];
     
     for (int i = 0; i < hp.num_runs_; i++){
         cout << endl;
@@ -172,7 +173,7 @@ int main(int argc, char *argv[]) {
                 cout << "Accuracy: \t" << accuracy << endl;
                 cout << endl;
                 Result result = experimenter.get_detailed_result();
-                result_vector[i][j] = result;
+                result_arr[i][j] = result;
                 cout << "Total samples used for training: "
                 << result.samples_used_for_training_ << endl;
                 cout << endl;
@@ -186,29 +187,50 @@ int main(int argc, char *argv[]) {
     }
     
     /*
-     *  Compute the average results of all runs
+     *  Compute the average results of all runs and print them to stdout
      */
     if (hp.num_runs_ > 1){
-        cout << endl;
-        cout << "------------------------------" << endl;
-        cout << "Average results (" << hp.num_runs_ << " runs):" << endl;
-        cout << "------------------------------" << endl;
-
+        cout << "-------------------------------" << endl;
+        cout << "   Average results (" << hp.num_runs_ << " runs):" << endl;
+        cout << "-------------------------------" << endl;
+        const char separator    = ' ';
+        const int numWidth      = 12;
         
-        float avg_accuracy[num_query_steps];
-        float avg_samples_used_for_training[num_query_steps];
+        cout << left << setw(numWidth) << setfill(separator) << "Samples:";
+        cout << left << setw(numWidth) << setfill(separator) << "Accuracy:";
+        cout << left << setw(numWidth) << setfill(separator) << "MicroPrec:";
+        cout << left << setw(numWidth) << setfill(separator) << "MacroPrec:";
+        cout << left << setw(numWidth) << setfill(separator) << "MicroRec:";
+        cout << left << setw(numWidth) << setfill(separator) << "MacroRec:";
+        cout << endl;
+
+        arma::fvec avg_accuracy(num_query_steps, arma::fill::zeros);
+        arma::fvec avg_samples_used_for_training(num_query_steps, arma::fill::zeros);
+        arma::fvec avg_micro_precision(num_query_steps, arma::fill::zeros);
+        arma::fvec avg_micro_recall(num_query_steps, arma::fill::zeros);
+        arma::fvec avg_macro_precision(num_query_steps, arma::fill::zeros);
+        arma::fvec avg_macro_recall(num_query_steps, arma::fill::zeros);
         
         for (int j = 0; j < num_query_steps; j++){
-            avg_accuracy[j] = 0;
-            avg_samples_used_for_training[j] = 0;
             for (int i = 0; i < hp.num_runs_; i++){
-                avg_accuracy[j] += result_vector[i][j].accuracy_/hp.num_runs_;
-                avg_samples_used_for_training[j] +=
-                    (float)result_vector[i][j].samples_used_for_training_/(float)hp.num_runs_;
+                avg_accuracy(j) += result_arr[i][j].accuracy_/hp.num_runs_;
+                avg_samples_used_for_training(j) +=
+                    (float)result_arr[i][j].samples_used_for_training_/hp.num_runs_;
+                avg_micro_precision(j) += result_arr[i][j].micro_avg_precision_/hp.num_runs_;
+                avg_micro_recall(j) += result_arr[i][j].micro_avg_recall_/hp.num_runs_;
+                avg_macro_precision(j) += result_arr[i][j].macro_avg_precision_/hp.num_runs_;
+                avg_macro_recall(j) += result_arr[i][j].macro_avg_recall_/hp.num_runs_;
             }
-            cout << "Accuracy: " << avg_accuracy[j] << "\t";
-            cout << "Samples: " << avg_samples_used_for_training[j] << endl;
+            
+            cout << left << setw(numWidth) << setfill(separator) << avg_samples_used_for_training(j);
+            cout << left << setw(numWidth) << setfill(separator) << avg_accuracy(j);
+            cout << left << setw(numWidth) << setfill(separator) << avg_micro_precision(j);
+            cout << left << setw(numWidth) << setfill(separator) << avg_macro_precision(j);
+            cout << left << setw(numWidth) << setfill(separator) << avg_micro_recall(j);
+            cout << left << setw(numWidth) << setfill(separator) << avg_macro_recall(j);
+            cout << endl;
         }
+        cout << endl;
     }
 
 /*---------------------------------------------------------------------------*/

@@ -319,26 +319,59 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
  */
 double Experimenter::evaluate_results(DataSet& dataset_test) {
 
-  dataset_test.reset_position();
-  unsigned int same_elements = 0;
-  for (unsigned int n_elem = 0; n_elem < pResult_ -> result_prediction_.size();
+    dataset_test.reset_position();
+    
+    // Initialize metrics
+    arma::fvec true_positives(dataset_test.num_classes_, arma::fill::zeros);
+    arma::fvec false_positives(dataset_test.num_classes_, arma::fill::zeros);
+    arma::fvec false_negatives(dataset_test.num_classes_, arma::fill::zeros);
+
+    pResult_->precision_.zeros(dataset_test.num_classes_);
+    pResult_->recall_.zeros(dataset_test.num_classes_);
+
+    // Evaluate predictions and save TP, FP and FN
+    unsigned int same_elements = 0;
+    for (unsigned int n_elem = 0; n_elem < pResult_ -> result_prediction_.size();
           n_elem++) {
       
       Sample sample = dataset_test.get_next_sample();
       if (pResult_ -> result_prediction_[n_elem] == sample.y) {
           same_elements++;
           pResult_ -> result_correct_prediction_.push_back(1);
+          true_positives[pResult_ -> result_prediction_[n_elem]] += 1;
       } else {
           pResult_ -> result_correct_prediction_.push_back(0);
+          false_positives[pResult_ -> result_prediction_[n_elem]] += 1;
+          false_negatives[sample.y] += 1;
       }
-  }
-  float accuracy = 0.0;
-  if (same_elements != 0) {
+    }
+    
+    // Compute precision and recall for all classes (1vsAll)
+    for (int i = 0; i < dataset_test.num_classes_; i++){
+        if((true_positives[i] + false_positives[i]) > 0)
+            pResult_->precision_[i] = true_positives[i]/(true_positives[i] + false_positives[i]);
+        if (true_positives[i] + false_negatives[i])
+            pResult_->recall_[i] = true_positives[i]/(true_positives[i] + false_negatives[i]);
+    }
+    
+    // Compute micro averages
+    pResult_->micro_avg_precision_ = arma::accu(true_positives)/
+        (arma::accu(true_positives) + arma::accu(false_positives));
+    pResult_->micro_avg_recall_ = arma::accu(true_positives)/
+        (arma::accu(true_positives) + arma::accu(false_negatives));
+    
+    // Compute macro averages
+    pResult_->macro_avg_precision_ = arma::accu(pResult_->precision_)/pResult_->precision_.size();
+    pResult_->macro_avg_recall_ = arma::accu(pResult_->recall_)/pResult_->precision_.size();
+    
+    // Compute accuracy
+    float accuracy = 0.0;
+    if (same_elements != 0) {
       accuracy = (float) same_elements / pResult_ -> result_prediction_.size();
-  } else {
+    } else {
       accuracy = 0.0;
-  }
-  return accuracy;
+    }
+    return accuracy;
 }
 /**
  * Return training time

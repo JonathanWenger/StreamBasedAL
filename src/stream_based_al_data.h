@@ -57,6 +57,15 @@ class Result {
     arma::Col<arma::uword> confidence_;  /**< Save all confidence values */
     /**< Save all false predicted confidence values */
     arma::Col<arma::uword> confidence_false_;
+    
+    arma::fvec precision_;            /** TP/(TP+FP) for each class */
+    arma::fvec recall_;               /** TP/(TP+FN) for each class */
+    /** micro average: global count of TP, FP, TN and FN */
+    float micro_avg_precision_;
+    float micro_avg_recall_;
+    /** macro average: unweighted mean of individual label metrics */
+    float macro_avg_precision_;       /**< average precision over all labels */
+    float macro_avg_recall_;          /**< average recall over all labels */
 };
 
 /*---------------------------------------------------------------------------*/
