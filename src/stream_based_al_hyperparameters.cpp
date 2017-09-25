@@ -11,9 +11,8 @@
  *
  */
 
-#include <iostream>
-#include <libconfig.h++>
 #include "stream_based_al_hyperparameters.h"
+
 
 using namespace libconfig;
 

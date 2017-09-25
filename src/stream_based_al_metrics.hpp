@@ -14,7 +14,7 @@
 class Metrics{
     
 public:
-    void compute_metrics(DataSet& dataset_test, Result& pResult);
+    static void compute_metrics(DataSet& dataset_test, Result& pResult);
     
 };
 

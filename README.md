@@ -19,4 +19,5 @@ To run this code you will need the following main packages:
   (it is recommended to install LAPACK, BLAS and ATLAS), along with the 
   corresponding development/header files)
 - boost: libboost 1.54
+- libconfig
 

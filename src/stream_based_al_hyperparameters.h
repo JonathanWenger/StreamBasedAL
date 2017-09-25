@@ -15,6 +15,10 @@
 #define STREAM_BASED_AL_HYPERPARAMETERS_H_
 
 #include <string>
+#include <iostream>
+#include <libconfig.h++>
+
+
 using namespace std;
 
 /*

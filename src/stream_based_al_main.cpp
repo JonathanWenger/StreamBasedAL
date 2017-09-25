@@ -138,6 +138,7 @@ int main(int argc, char *argv[]) {
     const int num_query_steps = hp.active_num_query_steps_;
     int max_num_queries = hp.active_max_num_queries_;
     Result result_arr[hp.num_runs_][num_query_steps];
+    int samples_used_for_training[hp.num_runs_][num_query_steps];
     
     for (int i = 0; i < hp.num_runs_; i++){
         cout << endl;
@@ -150,32 +151,32 @@ int main(int argc, char *argv[]) {
             /* Initialize Mondrian forest */
             MondrianForest* forest = new MondrianForest(*settings, feat_dim);
             
-            /* Initialize experimenter class */
-            Experimenter experimenter(conf_value);
+            /* Initialize result */
+            result_arr[i][j] = Result();
+            samples_used_for_training[i][j] = forest->get_data_counter();
             
             if (training) {
               /* Option between active learning and without */
               if (hp.active_learning_ > 0)
-                experimenter.train_active(forest, dataset_train, hp);
+                forest->train_active(dataset_train, hp);
               else
-                experimenter.train(forest, dataset_train, hp);
+                forest->train(dataset_train, hp);
             }
-            
+            // Compute the number of samples used for training
+            samples_used_for_training[i][j] = forest->get_data_counter() - samples_used_for_training[i][j];
             
             if (testing) {
                 dataset_test.reset_position();
-                double accuracy = experimenter.test(forest, dataset_test, hp);
+                forest->classify(dataset_test, result_arr[i][j], hp);
 
                 cout << endl;
                 cout << "------------------" << endl;
                 cout << "Properties:       " << endl;
                 cout << "------------------" << endl;
-                cout << "Accuracy: \t" << accuracy << endl;
+                cout << "Accuracy: \t" << result_arr[i][j].accuracy_ << endl;
                 cout << endl;
-                Result result = experimenter.get_detailed_result();
-                result_arr[i][j] = result;
                 cout << "Total samples used for training: "
-                << result.samples_used_for_training_ << endl;
+                << samples_used_for_training[i][j] << endl;
                 cout << endl;
             }
             
@@ -215,7 +216,7 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < hp.num_runs_; i++){
                 avg_accuracy(j) += result_arr[i][j].accuracy_/hp.num_runs_;
                 avg_samples_used_for_training(j) +=
-                    (float)result_arr[i][j].samples_used_for_training_/hp.num_runs_;
+                    (float)samples_used_for_training[i][j]/hp.num_runs_;
                 avg_micro_precision(j) += result_arr[i][j].micro_avg_precision_/hp.num_runs_;
                 avg_micro_recall(j) += result_arr[i][j].micro_avg_recall_/hp.num_runs_;
                 avg_macro_precision(j) += result_arr[i][j].macro_avg_precision_/hp.num_runs_;

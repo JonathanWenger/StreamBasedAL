@@ -45,11 +45,8 @@ class Result {
     Result();
     ~Result(){};
     
-    double training_time_;  /**< Save training time */
     double testing_time_;  /**< Save testing time */
     double accuracy_;  /**< Accuracy value of testing data */
-    long int samples_used_for_training_;  /**< Number of samples that are
-                                            used for training */
     vector<int> result_prediction_;  /**< Save all predictions of a
                                        Mondrian forest */
     vector<int> result_correct_prediction_;  /**< Save all correct classified
@@ -93,9 +90,9 @@ class DataSet {
          * @param x_filename    : file with data points only
          * @param y_filename    : file with labels only
          */
-        void load(const string& filename);
         void load(const string& x_filename, const string& y_filename,
                 bool add_points = false);
+        void load(const string& filename);
         /**
          * Returns next sample
          */

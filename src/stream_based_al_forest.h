@@ -97,7 +97,7 @@ class MondrianForest {
          * Output: accuracy
          *
          */
-        void classify(DataSet& dataset, vector<int>& predictions, Hyperparameters& hp);
+        void classify(DataSet& dataset, Result& pResult, Hyperparameters& hp);
     
         float get_data_counter() const;
 
