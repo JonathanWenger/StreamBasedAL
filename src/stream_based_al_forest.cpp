@@ -373,8 +373,8 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
         cnt = arma::min(count_labels_, ones_vec);
     }
 
-    /* Check if current sample lies outside */
-    if (expo_param > 0) {
+    /* Check if denominator is > 0*/
+    if (-expm1(-expo_param * max_split_costs_) > 0) {
         /* 
          * Compute expected discount d, where \delta is drawn from a truncated
          * exponential with rate \eta_j(x), truncated to the interval
@@ -390,10 +390,12 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
          * Expected discount is averaging over time of cut which is
          * a truncated exponential
          */
+        assert(max_split_costs_ >= 0);
+        if(max_split_costs_ == 0) //TODO: Check whether max_split_costs == 0 can exist
+            discount =
         discount = (expo_param / (expo_param + settings_->discount_param)) *
-            (-(exp(-(expo_param + settings_->discount_param) *
-             max_split_costs_) - 1)) / 
-            (-(exp(-expo_param * max_split_costs_)-1));
+            (-expm1(-(expo_param + settings_->discount_param) * max_split_costs_)) /
+            (-expm1(-expo_param * max_split_costs_));
         
         assert(num_customers > 0);
         float discount_per_num_customers = discount / num_customers;
@@ -403,6 +405,9 @@ int MondrianNode::predict_class(Sample& sample, arma::fvec& pred_prob,
 
         pred_prob += prob_separated_now * prob_not_separated_yet * pred_prob_tmp;
         prob_not_separated_yet *= prob_not_separated_now;
+        
+        // Test for NaN
+        assert(all(pred_prob == pred_prob));
     }
     /* c_j,k: number of customers at restaurant j eating dish k */     
     /* Compute posterior mean normalized stable */

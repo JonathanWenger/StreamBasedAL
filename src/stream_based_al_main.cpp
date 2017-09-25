@@ -209,6 +209,7 @@ int main(int argc, char *argv[]) {
         arma::fvec avg_micro_recall(num_query_steps, arma::fill::zeros);
         arma::fvec avg_macro_precision(num_query_steps, arma::fill::zeros);
         arma::fvec avg_macro_recall(num_query_steps, arma::fill::zeros);
+        arma::fmat avg_confusion_matrix(dataset_test.num_classes_, dataset_test.num_classes_, arma::fill::zeros);
         
         for (int j = 0; j < num_query_steps; j++){
             for (int i = 0; i < hp.num_runs_; i++){
@@ -219,6 +220,9 @@ int main(int argc, char *argv[]) {
                 avg_micro_recall(j) += result_arr[i][j].micro_avg_recall_/hp.num_runs_;
                 avg_macro_precision(j) += result_arr[i][j].macro_avg_precision_/hp.num_runs_;
                 avg_macro_recall(j) += result_arr[i][j].macro_avg_recall_/hp.num_runs_;
+                if(j == num_query_steps - 1){
+                    avg_confusion_matrix += result_arr[i][j].confusion_matrix_/hp.num_runs_;
+                }
             }
             
             cout << left << setw(numWidth) << setfill(separator) << avg_samples_used_for_training(j);
@@ -230,6 +234,8 @@ int main(int argc, char *argv[]) {
             cout << endl;
         }
         cout << endl;
+        cout << "Average confusion matrix (predicted class vs. actual class):" << endl;
+        cout << avg_confusion_matrix;
     }
 
 /*---------------------------------------------------------------------------*/
