@@ -38,43 +38,6 @@ class Experimenter {
     ~Experimenter();
 
     /**
-    * Function trains a mondrian forest
-    * 
-    * Input parameter:
-    *
-    * @param mf        : A Mondrian forest
-    * @param dataset   : Trainings dataset
-    * @param hp        : Hyperparameters
-    *
-    */
-    void train(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp);
-
-    /**
-    * Function trains a mondrian forest in an active learning setting
-    *
-    * Input parameter:
-    *
-    * @param mf        : A Mondrian forest
-    * @param dataset   : Trainings dataset
-    * @param hp        : Hyperparameters
-    *
-    */
-    void train_active(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp);
-    /**
-     * Function tests/evaluates a mondrian forest
-     * 
-     * Input parameter:
-     *
-     * @param mf        : A Mondrian forest
-     * @param dataset   : Testing dataset
-     * @param hp        : Hyperparameters
-     *
-     * Output: accuracy
-     *
-     */
-    double test(MondrianForest* mf, DataSet& dataset, Hyperparameters& hp);
-
-    /**
      * Return training time
      */
     double get_training_time();

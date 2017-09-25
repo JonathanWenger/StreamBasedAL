@@ -146,7 +146,7 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
             if (pResult_->samples_used_for_training_ == hp.active_max_num_queries_){
                 break;
             }
-            pair<int, float> pred = mf->predict_class_confident(sample);
+            pair<int, float> pred = mf->classify_confident(sample);
             if (pred.second < hp.active_confidence_value_) {
                 mf->update(sample);
                 pResult_ -> samples_used_for_training_++;
@@ -176,7 +176,7 @@ void Experimenter::train_active(MondrianForest* mf, DataSet& dataset,
               break;
           }
 
-        pair<int, float> pred = mf->predict_class_confident(sample);
+        pair<int, float> pred = mf->classify_confident(sample);
         i_active_sample.first = sample;
         i_active_sample.second = pred.second;
         /* Insert sample */
@@ -269,7 +269,7 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
        * Calculates a confidence value for each prediction and saves
        * it in some kind of bar representation for further visualization
        */
-      pair<int, float> pred = mf->predict_class_confident(sample);
+      pair<int, float> pred = mf->classify_confident(sample);
       pred_class = pred.first;
       conf_pos = int((pred.second * 100) / 5);
 
@@ -287,7 +287,7 @@ double Experimenter::test(MondrianForest* mf, DataSet& dataset,
       }
     } else { 
       /* Prediction */
-      pred_class = mf->predict_class(sample);
+      pred_class = mf->classify(sample);
     }
 
     pResult_ -> result_prediction_.push_back(pred_class);

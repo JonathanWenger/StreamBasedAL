@@ -17,6 +17,8 @@
 		71C04A231F0E2622008DDE98 /* libarmadillo.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 71C04A221F0E2622008DDE98 /* libarmadillo.dylib */; };
 		71C04A891F0E26F3008DDE98 /* libboost_serialization.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 71C04A501F0E26F3008DDE98 /* libboost_serialization.dylib */; };
 		71C04A981F0E3585008DDE98 /* libconfig++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 71C04A241F0E263E008DDE98 /* libconfig++.dylib */; };
+		71F341BD1F78F2DF00B4A5E6 /* stream_based_al_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 71F341BB1F78F2DF00B4A5E6 /* stream_based_al_tree.cpp */; };
+		71F341C01F78FC0300B4A5E6 /* stream_based_al_metrics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 71F341BE1F78FC0300B4A5E6 /* stream_based_al_metrics.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -55,6 +57,10 @@
 		71C04A221F0E2622008DDE98 /* libarmadillo.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libarmadillo.dylib; path = ../../../../../../../../usr/local/lib/libarmadillo.dylib; sourceTree = "<group>"; };
 		71C04A241F0E263E008DDE98 /* libconfig++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libconfig++.dylib"; path = "../../../../../../../../usr/local/lib/libconfig++.dylib"; sourceTree = "<group>"; };
 		71C04A501F0E26F3008DDE98 /* libboost_serialization.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_serialization.dylib; path = ../../../../../../../../usr/local/lib/libboost_serialization.dylib; sourceTree = "<group>"; };
+		71F341BB1F78F2DF00B4A5E6 /* stream_based_al_tree.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stream_based_al_tree.cpp; sourceTree = "<group>"; };
+		71F341BC1F78F2DF00B4A5E6 /* stream_based_al_tree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stream_based_al_tree.hpp; sourceTree = "<group>"; };
+		71F341BE1F78FC0300B4A5E6 /* stream_based_al_metrics.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stream_based_al_metrics.cpp; sourceTree = "<group>"; };
+		71F341BF1F78FC0300B4A5E6 /* stream_based_al_metrics.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stream_based_al_metrics.hpp; sourceTree = "<group>"; };
 		71FD7E901F0A66ED000E352F /* StreamBasedAL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StreamBasedAL; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -107,6 +113,10 @@
 				71C04A0C1F0E2192008DDE98 /* stream_based_al_random.h */,
 				71C04A0E1F0E2192008DDE98 /* stream_based_al_utilities.cpp */,
 				71C04A0F1F0E2192008DDE98 /* stream_based_al_utilities.h */,
+				71F341BB1F78F2DF00B4A5E6 /* stream_based_al_tree.cpp */,
+				71F341BC1F78F2DF00B4A5E6 /* stream_based_al_tree.hpp */,
+				71F341BE1F78FC0300B4A5E6 /* stream_based_al_metrics.cpp */,
+				71F341BF1F78FC0300B4A5E6 /* stream_based_al_metrics.hpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -205,6 +215,8 @@
 				71C04A1F1F0E2193008DDE98 /* stream_based_al_utilities.cpp in Sources */,
 				71C04A171F0E2192008DDE98 /* stream_based_al_forest.cpp in Sources */,
 				71C04A1B1F0E2193008DDE98 /* stream_based_al_main.cpp in Sources */,
+				71F341C01F78FC0300B4A5E6 /* stream_based_al_metrics.cpp in Sources */,
+				71F341BD1F78F2DF00B4A5E6 /* stream_based_al_tree.cpp in Sources */,
 				71C04A131F0E2192008DDE98 /* stream_based_al_data.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
