@@ -1,10 +1,15 @@
-//
-//  stream_based_al_tree.hpp
-//  StreamBasedAL
-//
-//  Created by Jonathan Wenger on 25.09.17.
-//  Copyright © 2017 Jonathan Wenger. All rights reserved.
-//
+// -*- C++ -*-
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 or the License, or
+ * (at your option) any later version.
+ *
+ * Copyright (C) 2016
+ * Dep. Of Computer Science
+ * Technical University of Munich (TUM)
+ *
+ */
 
 #ifndef stream_based_al_tree_hpp
 #define stream_based_al_tree_hpp
@@ -273,7 +278,8 @@ public:
      * Predict class of current sample
      */
     int classify(Sample& sample, arma::fvec& pred_prob,
-                      float& prob_not_separated_yet, mondrian_confidence& m_conf);
+                 float& prob_not_separated_yet, mondrian_confidence& m_conf,
+                 bool density_update = false);
     /**
      * Return address of root node
      *
@@ -292,7 +298,7 @@ public:
      *                       1. update num_classes_ (number of classes)
      *                       2. update count_labels_ (label histogram)
      */
-    void update(const Sample& sample);
+    void train(const Sample& sample, bool density_update = false);
     /**
      * Update the expected probability mass of the node and subsequent
      * children based on the parameters of the decision distribution.
@@ -373,8 +379,7 @@ private:
     /**
      * Compute left right statistic
      */
-    std::pair<arma::fvec, arma::fvec> compute_left_right_statistics(
-                                                                    int& split_dim, float& split_loc, const arma::fvec& sample_x,
+    std::pair<arma::fvec, arma::fvec> compute_left_right_statistics(int& split_dim, float& split_loc, const arma::fvec& sample_x,
                                                                     arma::fvec min_cur_block, arma::fvec max_cur_block,
                                                                     bool left_split);
     /**
@@ -399,8 +404,7 @@ private:
     /**
      * Compute posterior mean
      */
-    arma::fvec compute_posterior_mean_normalized_stable(
-                                                        arma::Col<arma::uword>& cnt, float& discount,
+    arma::fvec compute_posterior_mean_normalized_stable(arma::Col<arma::uword>& cnt, float& discount,
                                                         arma::fvec& base);
     void update_depth();
     /**
@@ -411,7 +415,7 @@ private:
     /**
      * Extend mondrian block to include new training data
      */
-    void extend_mondrian_block(const Sample& sample);
+    void extend_mondrian_block(const Sample& sample, bool density_update = false);
     
     /**
      * Compute the posterior of the decision distribution at the current
@@ -457,12 +461,13 @@ public:
     /**
      * Update current data point
      */
-    void update(Sample& sample);
+    void train(Sample& sample, bool density_update = false);
     /**
      * Predict class of current sample
      */
     int classify(Sample& sample, arma::fvec& pred_prob,
-                      mondrian_confidence& m_conf);
+                 mondrian_confidence& m_conf, bool density_update = false);
+
     MondrianNode* get_max_prob_mass_leaf();
     /**
      *  Set the pointer to the leaf with the maximum probability mass in the tree

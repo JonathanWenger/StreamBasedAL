@@ -51,9 +51,13 @@ class MondrianForest {
 
         ~MondrianForest();
         /**
-         * Update current data point
+         * Train forest with a single data sample with the option to perform
+         * a density update.
+         *
+         * @param sample            Data sample for update.
+         * @param density_update    Update to density estimate of forest.
          */ 
-        void update(Sample& sample);
+        void train(Sample& sample, bool density_update = false);
     
         /**
          * Function trains a Mondrian forest
@@ -84,20 +88,18 @@ class MondrianForest {
     
         /**
          * Predict class and return confidence
-         */
-        pair<int, float> classify_confident(Sample& sample);
-        /**
-         * Function tests/evaluates a mondrian forest
          *
-         * Input parameter:
+         * @param sample            Data sample for update.
+         * @param density_update    Update to density estimate of forest.
+         */
+        pair<int, float> classify_confident(Sample& sample, bool density_update = false);
+        /**
+         * Function tests/evaluates a Mondrian forest
          *
          * @param dataset   : Testing dataset
          * @param hp        : Hyperparameters
-         *
-         * Output: accuracy
-         *
          */
-        void classify(DataSet& dataset, Result& pResult, Hyperparameters& hp);
+        void classify(DataSet& dataset, Result& pResult, Hyperparameters& hp, bool density_update = false);
     
         float get_data_counter() const;
 
@@ -112,7 +114,7 @@ class MondrianForest {
          * (returns probability of all classes)
          */
         arma::fvec predict_probability(Sample& sample,
-                mondrian_confidence& m_conf);
+                mondrian_confidence& m_conf, bool density_update = false);
         /*
          * Calculates confidence value
          */

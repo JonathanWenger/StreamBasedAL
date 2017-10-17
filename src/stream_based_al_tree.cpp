@@ -1,10 +1,15 @@
-//
-//  stream_based_al_tree.cpp
-//  StreamBasedAL
-//
-//  Created by Jonathan Wenger on 25.09.17.
-//  Copyright © 2017 Jonathan Wenger. All rights reserved.
-//
+// -*- C++ -*-
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 or the License, or
+ * (at your option) any later version.
+ *
+ * Copyright (C) 2016
+ * Dep. Of Computer Science
+ * Technical University of Munich (TUM)
+ *
+ */
 
 #include "stream_based_al_tree.hpp"
 
@@ -315,7 +320,8 @@ void MondrianNode::add_new_class() {
  * Predict class of current sample
  */
 int MondrianNode::classify(Sample& sample, arma::fvec& pred_prob,
-                                float& prob_not_separated_yet, mondrian_confidence& m_conf) {
+                           float& prob_not_separated_yet, mondrian_confidence& m_conf,
+                           bool density_update) {
     
     if (settings_->debug)
         cout << "classify..." << endl;
@@ -411,17 +417,26 @@ int MondrianNode::classify(Sample& sample, arma::fvec& pred_prob,
         if (sample.x[split_dim_] <= split_loc_) {
             if (settings_->debug)
                 cout << "left" << endl;
+            // Update density parameters
+            if(density_update)
+                increment_decision_distr_params(true);
+            // Recurse on child
             pred_class = id_left_child_node_->classify(sample, pred_prob,
                                                             prob_not_separated_yet, m_conf);
+            
         } else {
             if (settings_->debug)
                 cout << "right" << endl;
+            // Update density parameters
+            if(density_update)
+                increment_decision_distr_params(false);
+            // Recurse on child
             pred_class = id_right_child_node_->classify(sample, pred_prob,
                                                              prob_not_separated_yet, m_conf);
         }
     } else if (is_leaf_ && (expo_param <= 0)) {
-        pred_prob = compute_posterior_mean_normalized_stable(
-                                                             cnt, discount, base) * prob_not_separated_yet;
+        pred_prob = compute_posterior_mean_normalized_stable(cnt, discount, base)
+                    * prob_not_separated_yet;
     }
     /* Get class with highest probability */
     /* Check if all classes have same probability -> return -2 */
@@ -456,7 +471,7 @@ MondrianNode* MondrianNode::update_root_node() {
 /*
  * Update current data sample
  */
-void MondrianNode::update(const Sample& sample) {
+void MondrianNode::train(const Sample& sample, bool density_update) {
     /*
      * Additional check for the case that less than
      * two data points passed by at the root node
@@ -466,7 +481,7 @@ void MondrianNode::update(const Sample& sample) {
         sample_mondrian_block(sample); /* Set max_split_cost */
         add_training_point_to_node(sample);
     } else {
-        extend_mondrian_block(sample);
+        extend_mondrian_block(sample, density_update);
     }
 }
 
@@ -849,7 +864,7 @@ void MondrianNode::sample_mondrian_block(const Sample& sample,
 /*
  * Extend mondrian block to include new training data
  */
-void MondrianNode::extend_mondrian_block(const Sample& sample) {
+void MondrianNode::extend_mondrian_block(const Sample& sample, bool density_update) {
     if (settings_->debug)
         cout << "### extend_mondrian_block: " << endl;
     
@@ -864,10 +879,8 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
     arma::fvec tmp_min_block = mondrian_block_->get_min_block_dim();
     arma::fvec tmp_max_block = mondrian_block_->get_max_block_dim();
     
-    arma::fvec e_lower = arma::max(
-                                   zero_vec, (tmp_min_block - sample.x));
-    arma::fvec e_upper = arma::max(
-                                   zero_vec, (sample.x - tmp_max_block));
+    arma::fvec e_lower = arma::max(zero_vec, (tmp_min_block - sample.x));
+    arma::fvec e_upper = arma::max(zero_vec, (sample.x - tmp_max_block));
     /*
      * sample e (expo_param) from exponential distribution with rate
      * sum_d( e^l_d + e^u_d )
@@ -912,15 +925,17 @@ void MondrianNode::extend_mondrian_block(const Sample& sample) {
             if (sample.x[split_dim_] <= split_loc_) {
                 assert(id_left_child_node_!=NULL);
                 // Update density parameters
-                increment_decision_distr_params(left_split);
+                if(density_update)
+                    increment_decision_distr_params(left_split);
                 // Recurse on child
-                id_left_child_node_->extend_mondrian_block(sample);
+                id_left_child_node_->extend_mondrian_block(sample, density_update);
             } else {
                 assert(id_right_child_node_!=NULL);
                 // Update density parameters
-                increment_decision_distr_params(!left_split);
+                if(density_update)
+                    increment_decision_distr_params(!left_split);
                 // Recurse on child
-                id_right_child_node_->extend_mondrian_block(sample);
+                id_right_child_node_->extend_mondrian_block(sample, density_update);
             }
         } else {
             assert(is_leaf_);
@@ -1187,7 +1202,7 @@ void MondrianTree::print_info() {
 /*
  * Update current data point
  */
-void MondrianTree::update(Sample& sample) {
+void MondrianTree::train(Sample& sample, bool density_update) {
     /* Check if sample belongs to a new class */
     bool new_class = check_if_new_class(sample);
     if (new_class){
@@ -1195,22 +1210,27 @@ void MondrianTree::update(Sample& sample) {
     }
     ++data_counter_;  /* Update counter of data points */
     /* Start updating current sample at the root node of the tree */
-    root_node_->update(sample);
+    root_node_->train(sample, density_update);
     /* Check if there exists a new root node */
     root_node_ = root_node_->update_root_node();
     /* Update expected probability masses */
-    root_node_->update_expected_prob_mass();
+    if(density_update)
+        root_node_->update_expected_prob_mass();
 }
 /*
  * Predict class of current sample
  */
 int MondrianTree::classify(Sample& sample, arma::fvec& pred_prob,
-                                mondrian_confidence& m_conf) {
+                           mondrian_confidence& m_conf, bool density_update) {
     
     float prob_not_separated_yet = 1.;
-    //arma::fvec pred_prob(num_classes_, arma::fill::zeros);
     int pred_class = root_node_->classify(sample, pred_prob,
-                                               prob_not_separated_yet, m_conf);
+                                          prob_not_separated_yet, m_conf,
+                                          density_update);
+    
+    /* Update expected probability masses for density estimate*/
+    root_node_->update_expected_prob_mass();
+    
     if (settings_->debug) {
         cout << "pred class: " << pred_class << endl;
         cout << "prob: " << endl << pred_prob << endl;
